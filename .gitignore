@@ -1,0 +1,13 @@
+.svn/
+Build/*.opensdf
+Build/*.sdf
+Build/*.suo
+Build/*.user
+Build/Debug/
+alhena
+*.o
+analyser/*.o
+misc/*.o
+modules/*.o
+bin/
+view/
