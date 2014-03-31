@@ -1,0 +1,40 @@
+# Author: zhanglongx <zhanglongx@gmail.com>
+
+PROGRAM:=alhena
+VERBOSE=@
+LINUX_KERNEL=/usr
+
+CC=gcc
+SOURCES=analyser/analyser.c analyser/data.c analyser/modules.c \
+        analyser/rule.c analyser/variables.c \
+        misc/message.c alhena.c
+MODULES=modules/dummy.c modules/fi.c modules/peak.c
+
+SOURCES+=$(MODULES)
+
+DESTDIR:=./
+
+CFLAGS:=-c -O0 -g -Wall -ffreestanding -I./ -I./analyser -I$(LINUX_KERNEL)/include
+
+OBJECTS:=$(patsubst %.c,%.o,$(SOURCES))
+EXECUTABLE:=$(PROGRAM)
+
+.PHONY : all clean install uninstall
+
+all: $(EXECUTABLE)
+
+clean:
+		$(VERBOSE) rm -f -v $(OBJECTS) $(EXECUTABLE)
+		
+install: $(EXECUTABLE)
+		$(VERBOSE) install -d $(DESTDIR)/bin
+		$(VERBOSE) install $(EXECUTABLE) $(DESTDIR)/bin
+
+uninstall:
+		$(VERBOSE) rm -f $(DESTDIR)/bin/$(EXECUTABLE)
+		
+$(EXECUTABLE): $(OBJECTS)
+		$(VERBOSE) $(CC) $(LDFLAGS) $(OBJECTS) -o $@
+		
+%.o : %.c %.h
+		$(VERBOSE) $(CC) $(CFLAGS) $< -o $@
