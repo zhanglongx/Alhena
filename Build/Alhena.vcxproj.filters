@@ -60,5 +60,8 @@
     <ClCompile Include="..\modules\peak.c">
       <Filter>modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\minday.c">
+      <Filter>modules</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

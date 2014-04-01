@@ -1,9 +1,11 @@
 .svn/
 Build/*.opensdf
+Build/*.csv
 Build/*.sdf
 Build/*.suo
 Build/*.user
 Build/Debug/
+Build/ipch/
 alhena
 *.o
 analyser/*.o

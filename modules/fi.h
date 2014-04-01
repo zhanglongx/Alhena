@@ -22,7 +22,8 @@ bool alhena_module_fi_pos( void *h, alhena_data_t *,
 
 alhena_module_begin( fi, "fi" )
     set_init_deinit( alhena_module_fi_init, alhena_module_fi_close )
-    set_ops( alhena_module_fi_pos,
+    set_ops( NULL,
+             alhena_module_fi_pos,
              NULL )
     create_config_integer_with_range( "fi-compare-days", 45, 1, 150 )
 alhena_module_end()

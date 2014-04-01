@@ -38,9 +38,10 @@ typedef pf_sys_rule_t  pf_sys_record_t;
     sys->pf_sys_init   = (init); \
     sys->pf_sys_deinit = (deinit); 
 
-#define set_ops( pos, neg ) \
-    sys->pf_sys_is_pos  = (pos); \
-    sys->pf_sys_is_neg  = (neg);
+#define set_ops( pre, pos, neg ) \
+    sys->pf_sys_rule_pre = (pre); \
+    sys->pf_sys_is_pos   = (pos); \
+    sys->pf_sys_is_neg   = (neg);
 
 #define set_stats( pre, post ) \
     sys->pf_sys_stat_pre = (pre);

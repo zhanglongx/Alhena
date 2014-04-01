@@ -6,6 +6,7 @@
 /* TODO: include modules here */
 #include "modules/dummy.h"
 #include "modules/fi.h"
+#include "modules/minday.h"
 
 #include "modules/peak.h"
 
@@ -40,9 +41,10 @@ int bank_collect()
     int i_sys = 0;
     
     // TODO/FIXME: register modules here, fix to use dynamic link
-    MODULE_REGISTER_HELPER( root,  &__g_sys_bank.sys[i_sys++] );
-    MODULE_REGISTER_HELPER( dummy, &__g_sys_bank.sys[i_sys++] );
-    MODULE_REGISTER_HELPER( fi,    &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( root,   &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( dummy,  &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( fi,     &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( minday, &__g_sys_bank.sys[i_sys++] );
 
     MODULE_REGISTER_HELPER( peak,  &__g_sys_bank.sys[i_sys++] );
 

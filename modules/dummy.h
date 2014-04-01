@@ -5,14 +5,13 @@
 extern "C" {
 #endif
 
-int alhena_module_dummy_process( void *, alhena_data_t *, 
-                                 int, int, float * );
 bool alhena_module_dummy_pos( void *, alhena_data_t *, 
                               int, int );
 
 alhena_module_begin( dummy, "dummy" )
     set_init_deinit( NULL, NULL )
-    set_ops( alhena_module_dummy_pos,
+    set_ops( NULL,
+             alhena_module_dummy_pos,
              NULL )
     create_config_integer_with_range( "dummy-test-int", 1, 0, 10 )
     create_config_bool_set_value( "dummy-test-bool", false )

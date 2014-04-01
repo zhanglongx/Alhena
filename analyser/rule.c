@@ -289,7 +289,7 @@ static int search_stage( alhena_module_t *p_stage, int i_stage,
         module_set_pre( l, p_data, i_start, i_end );
 
     /* using recursive to search */
-    for( i=i_start; i<i_end; i++ )
+    for( i=i_start+1; i<i_end; i++ )
     {
         list_for_each( l, p_stage )
         {
