@@ -8,7 +8,8 @@ CC=gcc
 SOURCES=analyser/analyser.c analyser/data.c analyser/modules.c \
         analyser/rule.c analyser/variables.c \
         misc/message.c alhena.c
-MODULES=modules/dummy.c modules/fi.c modules/peak.c
+MODULES=modules/dummy.c modules/fi.c modules/peak.c \
+        modules/minday.c
 
 SOURCES+=$(MODULES)
 
