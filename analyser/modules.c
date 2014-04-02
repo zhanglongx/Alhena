@@ -7,6 +7,7 @@
 #include "modules/dummy.h"
 #include "modules/fi.h"
 #include "modules/minday.h"
+#include "modules/no_upseri.h"
 
 #include "modules/peak.h"
 
@@ -41,10 +42,11 @@ int bank_collect()
     int i_sys = 0;
     
     // TODO/FIXME: register modules here, fix to use dynamic link
-    MODULE_REGISTER_HELPER( root,   &__g_sys_bank.sys[i_sys++] );
-    MODULE_REGISTER_HELPER( dummy,  &__g_sys_bank.sys[i_sys++] );
-    MODULE_REGISTER_HELPER( fi,     &__g_sys_bank.sys[i_sys++] );
-    MODULE_REGISTER_HELPER( minday, &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( root,      &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( dummy,     &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( fi,        &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( minday,    &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( no_upseri, &__g_sys_bank.sys[i_sys++] );
 
     MODULE_REGISTER_HELPER( peak,  &__g_sys_bank.sys[i_sys++] );
 
@@ -71,7 +73,6 @@ alhena_sys_t *bank_find_sys( const char *psz_name )
 {
     int i, i_modules = __g_sys_bank.i_sys;
 
-    /* call module deinit */
     for( i=0; i<i_modules; i++ )
     {
         alhena_sys_t *p_sys = &__g_sys_bank.sys[i];
@@ -171,7 +172,7 @@ bool module_is_positive( alhena_module_t *p,
         return p_sys->pf_sys_is_pos( p->p_private_sys, 
                                      p_data, i_day, i_end );
     else
-        return false;
+        return true;
 }
 
 bool module_is_negative( alhena_module_t *p, 

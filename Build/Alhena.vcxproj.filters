@@ -63,5 +63,8 @@
     <ClCompile Include="..\modules\minday.c">
       <Filter>modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\no_upseri.c">
+      <Filter>modules</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

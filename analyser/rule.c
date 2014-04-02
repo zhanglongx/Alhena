@@ -43,7 +43,7 @@ int alhena_rule_init( alhena_t *h )
 
     psz_chain = sys_get_string( p_root, "stats" );
 
-    // NOTE: ignore stats fail
+    // NOTE: ignore stats failure
     build_chain( h, &h->stats, psz_chain, 1 );
 
     return ALHENA_EOK;
@@ -55,18 +55,27 @@ void alhena_rule_deinit( alhena_t *h )
     int i;
 
     list_for_each_safe( l, n, &h->stats )
+    {
+        list_del_mod( l );        
         module_delete( l );
+    }
 
     for( i=0; i<h->i_open_stages; i++ )
     {
         list_for_each_safe( l, n, &h->open_chain[i] )
+        {
+            list_del_mod( l );            
             module_delete( l );
+        }
     }
 
     for( i=0; i<h->i_close_stages; i++ )
     {
         list_for_each_safe( l, n, &h->close_chain[i] )
+        {
+            list_del_mod( l );
             module_delete( l );
+        }
     }
 }
 
@@ -155,7 +164,10 @@ label_free_chain:
         alhena_module_t *l, *n;
         
         list_for_each_safe( l, n, p_start_chain )
+        {
+            list_del_mod( l );
             module_delete( l );
+        }
 
         p_start_chain++;
     }
@@ -215,7 +227,10 @@ static int build_stage( alhena_t *h, alhena_module_t *p_stage, const char *psz_s
 
 label_free_stage:
     list_for_each_safe( l, n, p_stage )
+    {
+        list_del_mod( l );        
         module_delete( l );
+    }
 
     return -1;
 }
@@ -238,9 +253,18 @@ static int run_chain( alhena_t *h, bool b_open_flag )
                 
         list_for_each( l, p_stage )
         {
+            if( module_is_negative( l, p_data, i_day, h->i_days - 1 ) == true )
+            {
+                b_first_positive = false;
+                break;
+            }
+            
             // FIXME: logic 'or' between modules?
             if( module_is_positive( l, p_data, i_day, h->i_days - 1 ) == false )
+            {
                 b_first_positive = false;
+                break;
+            }
         }
 
         if( b_first_positive )
@@ -266,7 +290,7 @@ static int run_chain( alhena_t *h, bool b_open_flag )
         }
     }
 
-    return ALHENA_EOK;    
+    return ALHENA_EOK;
 }
 
 static int search_stage( alhena_module_t *p_stage, int i_stage, 

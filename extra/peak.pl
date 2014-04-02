@@ -3,7 +3,7 @@
 my @max_cnt;
 my @min_cnt;
 
-my $g_total;
+my $g_total = 0;
 
 while(<>)
 {
@@ -52,6 +52,8 @@ while(<>)
         $g_total++;
     }
 }
+
+$g_total > 0 or die;
 
 print "total: $g_total\n";
 
