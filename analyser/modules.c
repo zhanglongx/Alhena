@@ -6,6 +6,7 @@
 /* TODO: include modules here */
 #include "modules/dummy.h"
 #include "modules/fi.h"
+#include "modules/maxday.h"
 #include "modules/minday.h"
 #include "modules/no_upseri.h"
 
@@ -45,6 +46,7 @@ int bank_collect()
     MODULE_REGISTER_HELPER( root,      &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( dummy,     &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( fi,        &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( maxday,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( minday,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( no_upseri, &__g_sys_bank.sys[i_sys++] );
 

@@ -1,7 +1,7 @@
 #include "rule.h"
 
-static int build_chain( alhena_t *, alhena_module_t *, const char *, int );
-static int build_stage( alhena_t *, alhena_module_t *, const char * );
+static int build_chain( alhena_t *, alhena_module_t *, const char *, int, bool );
+static int build_stage( alhena_t *, alhena_module_t *, const char *, bool );
 static int run_chain( alhena_t *, bool );
 static int search_stage( alhena_module_t *, int , alhena_data_t *,
                          int , int );
@@ -22,7 +22,7 @@ int alhena_rule_init( alhena_t *h )
 
     psz_chain = sys_get_string( p_root, "open-chain" );
 
-    i_stages = build_chain( h, h->open_chain, psz_chain, ARRAY_SIZE( h->open_chain ) );
+    i_stages = build_chain( h, h->open_chain, psz_chain, ARRAY_SIZE( h->open_chain ), false );
     if( i_stages < 0 )
         return ALHENA_EFATAL;
     
@@ -35,7 +35,7 @@ int alhena_rule_init( alhena_t *h )
 
     psz_chain = sys_get_string( p_root, "close-chain" );
 
-    i_stages = build_chain( h, h->close_chain, psz_chain, ARRAY_SIZE( h->close_chain ) );
+    i_stages = build_chain( h, h->close_chain, psz_chain, ARRAY_SIZE( h->close_chain ), false );
     if( i_stages < 0 )
         return ALHENA_EFATAL;
 
@@ -44,7 +44,7 @@ int alhena_rule_init( alhena_t *h )
     psz_chain = sys_get_string( p_root, "stats" );
 
     // NOTE: ignore stats failure
-    build_chain( h, &h->stats, psz_chain, 1 );
+    build_chain( h, &h->stats, psz_chain, 1, true );
 
     return ALHENA_EOK;
 }
@@ -109,7 +109,8 @@ void alhena_rule_output_day( alhena_t *h, int i_day )
 }
 
 static int build_chain( alhena_t *h, alhena_module_t *p_chain, 
-                        const char *psz_chain, int i_max_stages )
+                        const char *psz_chain, int i_max_stages,
+                        bool b_stat_chain )
 {
     alhena_module_t *p_start_chain = p_chain;
     const char *p = psz_chain;
@@ -131,7 +132,7 @@ static int build_chain( alhena_t *h, alhena_module_t *p_chain,
             goto label_free_chain;
         }
 
-        if( build_stage( h, p_chain, psz_name ) < 0 )
+        if( build_stage( h, p_chain, psz_name, b_stat_chain ) < 0 )
             goto label_free_chain;
 
         msg_Dbg( "loaded %s in stage: %d", psz_name, i_stage );
@@ -175,12 +176,14 @@ label_free_chain:
     return -1;
 }
 
-static int build_stage( alhena_t *h, alhena_module_t *p_stage, const char *psz_stage )
+static int build_stage( alhena_t *h, alhena_module_t *p_stage, const char *psz_stage,
+                        bool b_stat_stage )
 {
     alhena_sys_t *p_root = h->p_sys_root;
     alhena_module_t *p_mod, *l, *n;
     const char *p = psz_stage;
     bool b_output = sys_get_bool( p_root, "gen-output" );
+    bool b_all_neg = true;
     
     for( ;strlen(p); )
     {
@@ -223,12 +226,27 @@ static int build_stage( alhena_t *h, alhena_module_t *p_stage, const char *psz_s
         p = p_dot+1;
     }
 
+    list_for_each( l, p_stage )
+    {
+        if( l->p_sys->pf_sys_is_pos )
+        {
+            b_all_neg = false;
+            break;
+        }
+    }
+
+    if( b_all_neg && !b_stat_stage )
+    {
+        msg_Err( "stage doesn't have pos rule" );
+        goto label_free_stage;
+    }
+
     return LIST_IS_EMPTY( p_stage ) ? -1 : 0;
 
 label_free_stage:
     list_for_each_safe( l, n, p_stage )
     {
-        list_del_mod( l );        
+        list_del_mod( l );
         module_delete( l );
     }
 
@@ -315,20 +333,21 @@ static int search_stage( alhena_module_t *p_stage, int i_stage,
     /* using recursive to search */
     for( i=i_start+1; i<i_end; i++ )
     {
+        bool b_positive = true;
+       
         list_for_each( l, p_stage )
         {
-            bool b_positive = true;
-            
             if( module_is_negative( l, p_data, i, i_end ) == true )
                 return ALHENA_ENEG;
 
             if( module_is_positive( l, p_data, i, i_end ) == false )
                 b_positive = false;
-
-            if( b_positive )
-                return search_stage( p_stage + 1, i_stage - 1, 
-                                     p_data, i, i_end );
         }
+
+        if( b_positive )
+            return search_stage( p_stage + 1, i_stage - 1, 
+                                 p_data, i, i_end );
+        
     }
 
     return ALHENA_ENEG;

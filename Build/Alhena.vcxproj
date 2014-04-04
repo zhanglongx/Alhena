@@ -88,6 +88,7 @@
     <ClCompile Include="..\misc\message.c" />
     <ClCompile Include="..\modules\dummy.c" />
     <ClCompile Include="..\modules\fi.c" />
+    <ClCompile Include="..\modules\maxday.c" />
     <ClCompile Include="..\modules\minday.c" />
     <ClCompile Include="..\modules\no_upseri.c" />
     <ClCompile Include="..\modules\peak.c" />
