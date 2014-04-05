@@ -1,12 +1,54 @@
 #! /usr/bin/perl -w
 
-my @max_cnt_good = (0, 0, 0, 0);
-my @min_cnt_good = (0, 0, 0, 0);
+my @max_ref = ( .20, .10, .05, .0 );
+my @max_cnt = ( 0, 0, 0, 0, 0 );
 
-my @max_cnt_bad  = (0, 0, 0, 0);
-my @min_cnt_bad  = (0, 0, 0, 0);
+my @min_ref = ( -0.0, -0.05, -0.10, -0.20 );
+my @min_cnt = ( 0, 0, 0, 0, 0 );
 
 my $g_total = 0;
+
+sub count_number {
+    my ($p_ref, $p_cnt, $value ) = @_;
+    my $ref_num = scalar @$p_ref;
+    
+    foreach my $i (0..$ref_num-1)
+    {
+        if( $value > $$p_ref[$i] )
+        {
+            #print "$value $$p_ref[$i]\n";
+            
+            $$p_cnt[$i]++;
+            return;
+        }
+    }
+    
+    $$p_cnt[$ref_num]++;
+}
+
+sub print_number{
+    my ($name, $p_ref, $p_cnt, $total ) = @_;
+    
+    $total > 0 or die;
+    
+    print( "$name\n" );
+    
+    foreach my $v (@$p_ref)
+    {
+        printf "%.2f\t", $v;
+    }
+    
+    print"\n";
+    
+    foreach my $v (@$p_cnt)
+    {
+       $v = $v / $total * 100;
+        
+        printf "%.2f\t", $v;
+    }
+    
+    print "\n";
+}
 
 while(<>)
 {
@@ -16,50 +58,15 @@ while(<>)
     if( /^stat,.*,.*,(.*),(.*),(.*),(.*)/ )   
     {
         $max = $1;
-        $max_day = $2;
         $min = $3;
-        $min_day = $4;
         
         #print "$max, $max_day, $min, $min_day\n";
         
-        if( $max_day < $min_day )
-        {
-            if( $max <= 0.0 )
-            {
-                $max_cnt_good[0]++;
-            }
-            elsif ( $max > 0.0 && $max <= 0.05 )
-            {
-                $max_cnt_good[1]++;
-            }
-            elsif ( $max > 0.05 && $max <= 0.10 )
-            {
-                $max_cnt_good[2]++;
-            }
-            else
-            {
-                $max_cnt_good[3]++;
-            }
-            
-            if( $min > -0.0 )
-            {
-                $min_cnt_good[0]++;
-            }
-            elsif ( $min <= -0.0 && $min > -0.10 )
-            {
-                $min_cnt_good[1]++;
-            }
-            elsif ( $min <= -0.10 && $min > -20.0 )
-            {
-                $min_cnt_good[2]++;
-            }
-            else
-            {
-                $min_cnt_good[3]++;
-            }
-                    
-            $g_total++;
-        }
+        count_number( \@max_ref, \@max_cnt, $max );
+        
+        count_number( \@min_ref, \@min_cnt, $min );
+        
+        $g_total++;
     }
 }
 
@@ -67,22 +74,6 @@ $g_total > 0 or die;
 
 print "total: $g_total\n";
 
-print "max: ";
-foreach my $max (@max_cnt_good)
-{
-    $max = $max/$g_total * 100;
-    
-    printf "%.2f  ", $max;
-}
+print_number( "max", \@max_ref, \@max_cnt, $g_total );
 
-print "\n";
-
-print "min: ";
-foreach my $min (@min_cnt_good)
-{
-    $min = $min/$g_total * 100;
-    
-    printf "%.2f  ", $min;
-}
-
-print "\n";
+print_number( "min", \@min_ref, \@min_cnt, $g_total );

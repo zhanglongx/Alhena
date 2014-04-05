@@ -237,7 +237,7 @@ static int build_stage( alhena_t *h, alhena_module_t *p_stage, const char *psz_s
 
     if( b_all_neg && !b_stat_stage )
     {
-        msg_Err( "stage doesn't have pos rule" );
+        msg_Err( "stage should have at least one pos rule" );
         goto label_free_stage;
     }
 
