@@ -1,7 +1,7 @@
 # Author: zhanglongx <zhanglongx@gmail.com>
 
 PROGRAM:=alhena
-VERBOSE=@
+VERBOSE?=@
 LINUX_KERNEL=/usr
 
 CC=gcc
@@ -16,6 +16,7 @@ SOURCES+=$(MODULES)
 DESTDIR:=./
 
 CFLAGS:=-c -O0 -g -Wall -ffreestanding -I./ -I./analyser -I$(LINUX_KERNEL)/include
+LDFLAGS:=-lm
 
 OBJECTS:=$(patsubst %.c,%.o,$(SOURCES))
 EXECUTABLE:=$(PROGRAM)
@@ -25,17 +26,17 @@ EXECUTABLE:=$(PROGRAM)
 all: $(EXECUTABLE)
 
 clean:
-		$(VERBOSE) rm -f -v $(OBJECTS) $(EXECUTABLE)
+	$(VERBOSE) rm -f -v $(OBJECTS) $(EXECUTABLE)
 		
 install: $(EXECUTABLE)
-		$(VERBOSE) install -d $(DESTDIR)/bin
-		$(VERBOSE) install $(EXECUTABLE) $(DESTDIR)/bin
+	$(VERBOSE) install -d $(DESTDIR)/bin
+	$(VERBOSE) install $(EXECUTABLE) $(DESTDIR)/bin
 
 uninstall:
-		$(VERBOSE) rm -f $(DESTDIR)/bin/$(EXECUTABLE)
+	$(VERBOSE) rm -f $(DESTDIR)/bin/$(EXECUTABLE)
 		
 $(EXECUTABLE): $(OBJECTS)
-		$(VERBOSE) $(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(VERBOSE) $(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 		
 %.o : %.c %.h
-		$(VERBOSE) $(CC) $(CFLAGS) $< -o $@
+	$(VERBOSE) $(CC) $(CFLAGS) $< -o $@
