@@ -16,11 +16,15 @@ typedef struct _peak_t
     }day[MAX_DAYS];
     
     bool    is_open_high[MAX_DAYS];
-    float   highest[MAX_DAYS];
-    int     highest_day[MAX_DAYS];
+
+    float   highest1[MAX_DAYS];
+    int     highest_day1[MAX_DAYS];
 
     float   lowest[MAX_DAYS];
     int     lowest_day[MAX_DAYS];
+
+    float   highest2[MAX_DAYS];
+    int     highest_day2[MAX_DAYS];
 }peak_t;
 
 void *alhena_module_peak_init( variable_t *p_config, alhena_data_t *p_data,
@@ -62,22 +66,36 @@ bool alhena_module_peak_record_pre( void *h, alhena_data_t *p_data,
 
     for( i=i_day+1; i<i_end; i++ )
     {
-        if( p_data->f_high[i] > f_highest )
-        {
-            f_highest = p_data->f_high[i];
-            p_stat->highest_day[p_stat->i_records] = i - i_day;
-        }
-
         if( p_data->f_low[i] < f_lowest )
         {
             f_lowest = p_data->f_low[i];
             p_stat->lowest_day[p_stat->i_records] = i - i_day;
         }
+
+        if( p_data->f_high[i] > f_highest )
+        {
+            f_highest = p_data->f_high[i];
+            p_stat->highest_day2[p_stat->i_records] = i - i_day;
+        }
     }
 
     /* in percentage */
-    p_stat->highest[p_stat->i_records] = (f_highest - f_flag_close) / f_flag_close;
-    p_stat->lowest[p_stat->i_records] = (f_lowest - f_flag_close) / f_flag_close;
+    p_stat->lowest[p_stat->i_records]   = (f_lowest - f_flag_close) / f_flag_close;
+    p_stat->highest2[p_stat->i_records] = (f_highest - f_flag_close) / f_flag_close;    
+
+    f_highest = 0.0;
+    i_end = i_day + p_stat->lowest_day[p_stat->i_records];
+
+    for( i=i_day+1; i<=i_end; i++ )
+    {
+        if( p_data->f_high[i] > f_highest )
+        {
+            f_highest = p_data->f_high[i];
+            p_stat->highest_day1[p_stat->i_records] = i - i_day;
+        }
+    }
+
+    p_stat->highest1[p_stat->i_records] = (f_highest - f_flag_close) / f_flag_close;
 
     p_stat->day[p_stat->i_records].i_day   = p_data->day[i_day].i_day;
     p_stat->day[p_stat->i_records].i_month = p_data->day[i_day].i_month;
@@ -100,12 +118,14 @@ void alhena_module_peak_deinit( void *h )
                          p_stat->day[i].i_month,
                          p_stat->day[i].i_day,
                          p_stat->day[i].i_year );
-        fprintf( stdout, "%d,%f,%d,%f,%d\n", 
+        fprintf( stdout, "%d,%f,%d,%f,%d,%f,%d\n", 
                          p_stat->is_open_high[i],
-                         p_stat->highest[i],
-                         p_stat->highest_day[i],
+                         p_stat->highest1[i],
+                         p_stat->highest_day1[i],
                          p_stat->lowest[i], 
-                         p_stat->lowest_day[i] );
+                         p_stat->lowest_day[i],
+                         p_stat->highest2[i],
+                         p_stat->highest_day2[i] );
     }
 
     free( p_stat );

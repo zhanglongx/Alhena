@@ -1,7 +1,8 @@
 #! /usr/bin/perl -w
 
-my @max_ref = ( .20, .10, .05, .0 );
-my @max_cnt = ( 0, 0, 0, 0, 0 );
+my @max_ref  = ( .20, .10, .05, .0 );
+my @max_cnt1 = ( 0, 0, 0, 0, 0 );
+my @max_cnt2 = ( 0, 0, 0, 0, 0 );
 
 my @min_ref = ( -0.0, -0.05, -0.10, -0.20 );
 my @min_cnt = ( 0, 0, 0, 0, 0 );
@@ -52,19 +53,23 @@ sub print_number{
 
 while(<>)
 {
-    my $max;
+    my $max1;
     my $min;
+    my $max2;
     
-    if( /^stat,.*,.*,(.*),(.*),(.*),(.*)/ )   
+    if( /^stat,.*,.*,(.*),(.*),(.*),(.*),(.*),(.*)/ )   
     {
-        $max = $1;
-        $min = $3;
+        $max1 = $1;
+        $min  = $3;
+        $max2 = $5;
         
         #print "$max, $max_day, $min, $min_day\n";
         
-        count_number( \@max_ref, \@max_cnt, $max );
+        count_number( \@max_ref, \@max_cnt1, $max1 );
         
         count_number( \@min_ref, \@min_cnt, $min );
+        
+        count_number( \@max_ref, \@max_cnt2, $max2 );
         
         $g_total++;
     }
@@ -74,6 +79,8 @@ $g_total > 0 or die;
 
 print "total: $g_total\n";
 
-print_number( "max", \@max_ref, \@max_cnt, $g_total );
+print_number( "max1", \@max_ref, \@max_cnt1, $g_total );
 
 print_number( "min", \@min_ref, \@min_cnt, $g_total );
+
+print_number( "max2", \@max_ref, \@max_cnt2, $g_total );

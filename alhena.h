@@ -20,12 +20,12 @@ typedef uint8_t        bool;
 #define true           1
 #define false          0
 #else
-#error  "not support platform"
+#error  "not supported platform"
 #endif
 
 #include "misc/message.h"
 
-#define  ALHENA_VERSION             "1.3.4"
+#define  ALHENA_VERSION             "1.3.5"
 #define  ALHENA_MAX_FILENAME        1024
 
 #define  ALHENA_EOK                 (-0)
@@ -44,7 +44,7 @@ typedef uint8_t        bool;
 #   define ALHENA_SNPRINTF       _snprintf
 #   define ALHENA_STRDUP         _strdup
 #else
-#error  "not support platform"
+#error  "not supported platform"
 #endif
 
 #define  FLOAT_TOLERABLE            (0.001)
