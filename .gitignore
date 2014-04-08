@@ -8,6 +8,7 @@ Build/Debug/
 Build/ipch/
 alhena
 *.o
+*.patch
 analyser/*.o
 misc/*.o
 modules/*.o
