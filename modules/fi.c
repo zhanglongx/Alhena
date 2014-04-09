@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "analyser/common.h"
 #include "analyser/modules.h"
 
@@ -53,21 +55,33 @@ bool alhena_module_fi_pos( void *h, alhena_data_t *p_data,
                            int i_day, int i_end )
 {
     fi_t *p_fi = (fi_t *)h;
-    float max;
+    float f_sum = .0, f_square_sum = .0;
+    float f_sigma;
+    int i, i_start = i_day - p_fi->i_compare_days;
 
-    if( i_day < p_fi->i_compare_days )
+    if( i_start < 0 || i_day <= 0 )
         return false;
 
-    PAST_MAX_N_FLOAT( max, p_fi->fi_accl, i_day, p_fi->i_compare_days );
+    for( i=i_start; i<i_day; i++ )
+    {
+        f_sum        += p_fi->fi[i];
+        f_square_sum += p_fi->fi[i] * p_fi->fi[i];
+    }
 
-    if( !is_float_eq( p_fi->fi_accl[i_day], max ) )
+    f_sum        /= p_fi->i_compare_days;
+    f_square_sum /= p_fi->i_compare_days;
+
+    f_sigma = f_square_sum - f_sum * f_sum;
+
+    if( f_sigma < 0.0 )
+        f_sigma = -1.0f * f_sigma;
+
+#define SIGMA   (4.0f)
+
+    if( p_fi->fi[i_day] < f_sum + SIGMA * sqrtf( f_sigma ) )
         return false;
 
-    PAST_MAX_N_FLOAT( max, p_fi->fi, i_day, p_fi->i_compare_days );
-
-    if( !is_float_eq( p_fi->fi[i_day], max ) )
-        return false;
-    
     return true;
+#undef SIGMA
 }
 

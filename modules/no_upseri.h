@@ -5,15 +5,17 @@
 extern "C" {
 #endif
 
-bool alhena_module_no_upseri_record_neg( void *, alhena_data_t *, 
-                                         int , int );
+void *alhena_module_no_upseri_init( variable_t *, alhena_data_t *, int, float * );
+void alhena_module_no_upseri_close( void * );
+bool alhena_module_no_upseri_neg( void *, alhena_data_t *, int , int );
 
 alhena_module_begin( no_upseri, "no-upseri" )
-    set_init_deinit( NULL, NULL )
+    set_init_deinit( alhena_module_no_upseri_init, 
+                     alhena_module_no_upseri_close )
     set_ops( NULL, 
              NULL,
-             alhena_module_no_upseri_record_neg )
-    create_config_integer_with_range( "no-upseri-days", 3, 1, 7 )
+             alhena_module_no_upseri_neg )
+    create_config_integer_with_range( "no-upseri-days", 2, 1, 7 )
 alhena_module_end()
 
 #ifdef __cplusplus

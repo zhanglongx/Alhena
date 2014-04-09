@@ -53,25 +53,26 @@ sub print_number{
 
 while(<>)
 {
-    my $max1;
-    my $min;
-    my $max2;
-    
-    if( /^stat,.*,.*,(.*),(.*),(.*),(.*),(.*),(.*)/ )   
+    if( /^stat,.*,(.*),(.*),(.*),(.*),(.*),(.*),(.*)/ )   
     {
-        $max1 = $1;
-        $min  = $3;
-        $max2 = $5;
+        my $b_is_open_high = $1;
+        
+        my $max1 = $2;
+        my $min  = $4;
+        my $max2 = $6;
         
         #print "$max, $max_day, $min, $min_day\n";
         
-        count_number( \@max_ref, \@max_cnt1, $max1 );
-        
-        count_number( \@min_ref, \@min_cnt, $min );
-        
-        count_number( \@max_ref, \@max_cnt2, $max2 );
-        
-        $g_total++;
+        if( $b_is_open_high != 1 ) # $b_is_open_high != 1
+        {
+            count_number( \@max_ref, \@max_cnt1, $max1 );
+            
+            count_number( \@min_ref, \@min_cnt, $min );
+            
+            count_number( \@max_ref, \@max_cnt2, $max2 );
+            
+            $g_total++;
+        }
     }
 }
 

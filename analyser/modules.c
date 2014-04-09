@@ -272,11 +272,17 @@ int parse_command_line( int argc, char *argv[] )
     }
 
     if( sys_get_bool( p_root, "help" ) )
+    {
+        alhena_value_t value;
+
+        value.b_bool = false;
+        var_set_bool( &p_root->configs, "help", value );
         goto lable_display_usage;
+    }
 
     if( optind > argc - 1 )
     {
-        fprintf( stderr, "No input file. Run alhena --help for a list of options.\n" );
+        fprintf( stderr, "No input file. Run `alhena --help' for a list of options.\n" );
         return -1;
     }
 
@@ -312,7 +318,7 @@ static void usage()
             b_root = true;
 
         if( LIST_IS_EMPTY( &p_sys->configs ) )
-            fprintf( stderr, "    (none parameters)" );
+            fprintf( stderr, "     (none parameters)\n" );
         else
             list_for_each( l, &p_sys->configs )
             {

@@ -25,7 +25,7 @@ alhena_module_begin( fi, "fi" )
     set_ops( NULL,
              alhena_module_fi_pos,
              NULL )
-    create_config_integer_with_range( "fi-compare-days", 45, 1, 150 )
+    create_config_integer_with_range( "fi-compare-days", 80, 1, 150 )
 alhena_module_end()
 
 #ifdef __cplusplus
