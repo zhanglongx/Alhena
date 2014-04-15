@@ -1,11 +1,10 @@
 #include "analyser/common.h"
 #include "analyser/modules.h"
 
-#define MINDAYS     (4) // tempz!!
-
 typedef struct _minday_t
 {
     int i_start_day;
+    int i_compare_days;
 }minday_t;
 
 void *alhena_module_minday_init( variable_t *p_configs, alhena_data_t *p_data, 
@@ -16,6 +15,8 @@ void *alhena_module_minday_init( variable_t *p_configs, alhena_data_t *p_data,
     p = (minday_t *)calloc( 1, sizeof( minday_t ) );
     if( !p )
         return NULL;
+
+    p->i_compare_days = var_get_integer( p_configs, "minday-days" );
 
     return (void *)p;
 }
@@ -42,6 +43,6 @@ bool alhena_module_minday_pos( void *p_sys, alhena_data_t *p_data,
 {
     minday_t *p = (minday_t *)p_sys;
     
-    return (i_day - p->i_start_day > MINDAYS) ? true: false;
+    return (i_day - p->i_start_day > p->i_compare_days) ? true: false;
 }
 

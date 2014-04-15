@@ -44,10 +44,14 @@ typedef pf_sys_rule_t  pf_sys_record_t;
     sys->pf_sys_is_neg   = (neg);
 
 #define set_stats( pre, post ) \
-    sys->pf_sys_stat_pre = (pre);
+    sys->pf_sys_stat_pre  = (pre); \
+    sys->pf_sys_stat_post = (post);
 
 #define create_config_integer_with_range( name, v, min, max ) \
     var_create_integer_with_range( &sys->configs, (name), (v), (min), (max) );
+
+#define create_config_float_with_range( name, v, min, max ) \
+    var_create_float_with_range( &sys->configs, (name), (v), (min), (max) );
 
 #define create_config_bool_set_value( name, v ) \
     var_create_bool_value( &sys->configs, (name), (v) );
@@ -63,6 +67,9 @@ typedef pf_sys_rule_t  pf_sys_record_t;
 
 #define sys_get_integer( m, name ) \
     var_get_integer( &(m)->configs, (name) )
+
+#define sys_get_float( m, name ) \
+    var_get_float( &(m)->configs, (name) )
 
 #define sys_get_string( m, name ) \
     var_get_string( &(m)->configs, (name) )
@@ -81,6 +88,7 @@ typedef struct _alhena_sys_t
     pf_sys_rule_t        pf_sys_is_neg;
 
     pf_sys_record_t      pf_sys_stat_pre;
+    pf_sys_record_t      pf_sys_stat_post;
 
     variable_t           configs;          /* config parameters */
 
@@ -142,6 +150,7 @@ bool module_set_pre( alhena_module_t *, alhena_data_t *, int, int );
 bool module_is_positive( alhena_module_t *, alhena_data_t *, int , int );
 bool module_is_negative( alhena_module_t *, alhena_data_t *, int , int );
 bool module_stat_pre( alhena_module_t *, alhena_data_t *, int , int );
+bool module_stat_post( alhena_module_t *, alhena_data_t *, int , int );
 
 int parse_command_line( int argc, char *argv[] );
 

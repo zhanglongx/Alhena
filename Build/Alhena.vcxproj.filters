@@ -69,5 +69,8 @@
     <ClCompile Include="..\modules\maxday.c">
       <Filter>modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\pl_trade.c">
+      <Filter>modules</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

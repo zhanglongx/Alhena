@@ -2,7 +2,7 @@
 
 static int build_chain( alhena_t *, alhena_module_t *, const char *, int, bool );
 static int build_stage( alhena_t *, alhena_module_t *, const char *, bool );
-static int run_chain( alhena_t *, bool );
+static int run_chain( alhena_t *, int, bool );
 static int search_stage( alhena_module_t *, int , alhena_data_t *,
                          int , int );
 
@@ -22,7 +22,7 @@ int alhena_rule_init( alhena_t *h )
 
     psz_chain = sys_get_string( p_root, "open-chain" );
 
-    i_stages = build_chain( h, h->open_chain, psz_chain, ARRAY_SIZE( h->open_chain ), false );
+    i_stages = build_chain( h, h->open_chain, psz_chain, ARRAY_SIZE( h->open_chain ), true );
     if( i_stages < 0 )
         return ALHENA_EFATAL;
     
@@ -35,7 +35,7 @@ int alhena_rule_init( alhena_t *h )
 
     psz_chain = sys_get_string( p_root, "close-chain" );
 
-    i_stages = build_chain( h, h->close_chain, psz_chain, ARRAY_SIZE( h->close_chain ), false );
+    i_stages = build_chain( h, h->close_chain, psz_chain, ARRAY_SIZE( h->close_chain ), true );
     if( i_stages < 0 )
         return ALHENA_EFATAL;
 
@@ -44,7 +44,7 @@ int alhena_rule_init( alhena_t *h )
     psz_chain = sys_get_string( p_root, "stats" );
 
     // NOTE: ignore stats failure
-    build_chain( h, &h->stats, psz_chain, 1, true );
+    build_chain( h, &h->stats, psz_chain, 1, false );
 
     return ALHENA_EOK;
 }
@@ -81,7 +81,7 @@ void alhena_rule_deinit( alhena_t *h )
 
 int alhena_rule_run( alhena_t *h )
 {
-    return run_chain( h, true );
+    return run_chain( h, 0, true );
 }
 
 void alhena_rule_output_day( alhena_t *h, int i_day )
@@ -110,7 +110,7 @@ void alhena_rule_output_day( alhena_t *h, int i_day )
 
 static int build_chain( alhena_t *h, alhena_module_t *p_chain, 
                         const char *psz_chain, int i_max_stages,
-                        bool b_stat_chain )
+                        bool b_check )
 {
     alhena_module_t *p_start_chain = p_chain;
     const char *p = psz_chain;
@@ -132,7 +132,7 @@ static int build_chain( alhena_t *h, alhena_module_t *p_chain,
             goto label_free_chain;
         }
 
-        if( build_stage( h, p_chain, psz_name, b_stat_chain ) < 0 )
+        if( build_stage( h, p_chain, psz_name, b_check ) < 0 )
             goto label_free_chain;
 
         msg_Dbg( "loaded %s in stage: %d", psz_name, i_stage );
@@ -177,13 +177,12 @@ label_free_chain:
 }
 
 static int build_stage( alhena_t *h, alhena_module_t *p_stage, const char *psz_stage,
-                        bool b_stat_stage )
+                        bool b_check )
 {
     alhena_sys_t *p_root = h->p_sys_root;
     alhena_module_t *p_mod, *l, *n;
     const char *p = psz_stage;
     bool b_output = sys_get_bool( p_root, "gen-output" );
-    bool b_all_neg = true;
     
     for( ;strlen(p); )
     {
@@ -226,19 +225,24 @@ static int build_stage( alhena_t *h, alhena_module_t *p_stage, const char *psz_s
         p = p_dot+1;
     }
 
-    list_for_each( l, p_stage )
+    if( b_check )
     {
-        if( l->p_sys->pf_sys_is_pos )
-        {
-            b_all_neg = false;
-            break;
-        }
-    }
+        bool b_all_neg = true;
 
-    if( b_all_neg && !b_stat_stage )
-    {
-        msg_Err( "stage should have at least one pos rule" );
-        goto label_free_stage;
+        list_for_each( l, p_stage )
+        {
+            if( l->p_sys->pf_sys_is_pos )
+            {
+                b_all_neg = false;
+                break;
+            }
+        }
+
+        if( b_all_neg )
+        {
+            msg_Err( "stage should have at least one pos rule" );
+            goto label_free_stage;
+        }    
     }
 
     return LIST_IS_EMPTY( p_stage ) ? -1 : 0;
@@ -253,7 +257,7 @@ label_free_stage:
     return -1;
 }
 
-static int run_chain( alhena_t *h, bool b_open_flag )
+static int run_chain( alhena_t *h, int i_start, bool b_open_flag )
 {
     alhena_module_t *p_stage = b_open_flag ? h->open_chain : h->close_chain;
     alhena_module_t *l;
@@ -264,7 +268,7 @@ static int run_chain( alhena_t *h, bool b_open_flag )
     if( i_stages <= 0 )
         return ALHENA_EFATAL;
     
-    for( i_day=0; i_day<h->i_days; i_day++ )
+    for( i_day=i_start; i_day<h->i_days; i_day++ )
     {
         bool b_first_positive = true;
         int i_flag_day = -1;
@@ -302,9 +306,25 @@ static int run_chain( alhena_t *h, bool b_open_flag )
                 
                 list_for_each( l, &h->stats )
                     module_stat_pre( l, p_data, i_flag_day, h->i_days - 1 );
+
+                if( h->i_close_stages && i_flag_day < (int)h->i_days - 1 )
+                {
+                    list_for_each( l, &h->close_chain[0] )
+                        module_set_pre( l, p_data, i_flag_day, h->i_days - 1 );
+
+                    run_chain( h, i_flag_day + 1, false );
+                }
             }
             else
+            {
                 p_data->close_flag[i_flag_day] = 1;
+
+                list_for_each( l, &h->stats )
+                    module_stat_post( l, p_data, i_flag_day, h->i_days - 1 );
+
+                // finish close chain at first glance of positive
+                return ALHENA_EOK;
+            }
         }
     }
 

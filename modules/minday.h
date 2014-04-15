@@ -20,6 +20,7 @@ alhena_module_begin( minday, "minday" )
     set_ops( alhena_module_minday_pre,
              alhena_module_minday_pos,
              NULL )
+    create_config_integer_with_range( "minday-days", 4, 1, 100 )
 alhena_module_end()
 
 #ifdef __cplusplus

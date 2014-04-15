@@ -9,6 +9,7 @@
 #include "modules/maxday.h"
 #include "modules/minday.h"
 #include "modules/no_upseri.h"
+#include "modules/pl_trade.h"
 
 #include "modules/peak.h"
 
@@ -49,6 +50,7 @@ int bank_collect()
     MODULE_REGISTER_HELPER( maxday,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( minday,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( no_upseri, &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( pl_trade,  &__g_sys_bank.sys[i_sys++] );
 
     MODULE_REGISTER_HELPER( peak,  &__g_sys_bank.sys[i_sys++] );
 
@@ -201,6 +203,18 @@ bool module_stat_pre( alhena_module_t *p,
         return false;
 }
 
+bool module_stat_post( alhena_module_t *p, 
+                       alhena_data_t *p_data, int i_day, int i_end )
+{
+    const alhena_sys_t *p_sys = p->p_sys;
+
+    if( p_sys->pf_sys_stat_post )    
+        return p_sys->pf_sys_stat_post( p->p_private_sys,
+                                        p_data, i_day, i_end );
+    else
+        return false;
+}
+
 int parse_command_line( int argc, char *argv[] )
 {
 #define SHORT_OPTION_LEN    (256)
@@ -265,10 +279,18 @@ int parse_command_line( int argc, char *argv[] )
 
             var_set_integer_check( &p_sys->configs, p_config->psz_name, value );
         }
+        else if( p_config->i_type == ALHENA_VAR_FLOAT )
+        {
+            sscanf( optarg, "%f", &value.f_float );
+
+            var_set_float_check( &p_sys->configs, p_config->psz_name, value );
+        }
         else if( p_config->i_type == ALHENA_VAR_STRING )
         {
             var_set_string( &p_sys->configs, p_config->psz_name, optarg );
         }
+        else
+            assert(0);
     }
 
     if( sys_get_bool( p_root, "help" ) )
@@ -338,6 +360,8 @@ static void usage()
                 else if( l->i_type == ALHENA_VAR_BOOL )
                     fprintf( stderr, "(%s)", sys_get_bool( p_sys, l->psz_name ) ? 
                                              "true" : "false" );
+                else if( l->i_type == ALHENA_VAR_FLOAT )
+                    fprintf( stderr, "(%.2f)", sys_get_float( p_sys, l->psz_name ) );
                 else if( l->i_type == ALHENA_VAR_STRING &&
                          strlen( sys_get_string( p_sys, l->psz_name ) ) )
                     fprintf( stderr, "(%s)", sys_get_string( p_sys, l->psz_name ) );
@@ -364,7 +388,8 @@ static int generate_short_options( char *psz_short, int i_length )
         if( !strcmp( l->psz_name, "input-filename" ) )
             continue;
 
-        if( l->i_type == ALHENA_VAR_INTEGER || l->i_type == ALHENA_VAR_STRING )
+        if( l->i_type == ALHENA_VAR_INTEGER || l->i_type == ALHENA_VAR_STRING ||
+            l->i_type == ALHENA_VAR_FLOAT )
         {
             ALHENA_SNPRINTF( p, i_length - i_opt_length, "%c:", l->psz_name[0] );
             i_opt_length += 2;

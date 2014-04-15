@@ -71,6 +71,11 @@ int var_create( variable_t *var, const char *psz_name, int i_type )
             new_var->max.i_int = INT_MAX;
             break;
         }
+        case ALHENA_VAR_FLOAT:
+        {
+            new_var->min.f_float = .0f;
+            new_var->max.f_float = 10000.0f;
+        }
         default:
             break;
     }
@@ -139,6 +144,62 @@ int var_get_integer( variable_t *var, const char *psz_name )
     GET_VARIABLE( l, var, psz_name, ALHENA_VAR_INTEGER );   
 
     return l->value.i_int;
+}
+
+int var_float_min_max( variable_t *var, const char *psz_name, 
+                       alhena_value_t min, alhena_value_t max )
+{
+    variable_t *l;
+
+    GET_VARIABLE( l, var, psz_name, ALHENA_VAR_FLOAT );
+
+    if( min.f_float > max.f_float )
+    {
+        msg_Err( "set %s min exceeds max",
+                 psz_name, min.f_float, max.f_float );
+        return -2;
+    }
+
+    l->min.f_float = min.f_float;
+    l->max.f_float = max.f_float;
+
+    return 0;
+}
+
+int var_set_float_check( variable_t *var, const char *psz_name,
+                         alhena_value_t value )
+{
+    variable_t *l;
+
+    GET_VARIABLE( l, var, psz_name, ALHENA_VAR_FLOAT );
+
+    if( value.f_float < l->min.f_float )
+    {
+        msg_Err( "set `%s' %f below min %f, using min",
+                 psz_name, value.f_float, l->min.f_float );
+        value.f_float = l->min.f_float;
+    }
+
+    if( value.f_float > l->max.f_float )
+    {
+        msg_Err( "set `%s' %f above max %f, using max",
+                 psz_name, value.f_float, l->max.f_float );
+        value.f_float = l->max.f_float;
+    }
+
+    l->value.f_float = value.f_float;
+    msg_Dbg( "setting `%s' to value %f", psz_name, value.f_float );
+
+    return 0;
+}
+
+float var_get_float( variable_t *var, const char *psz_name )
+{
+    variable_t *l;
+
+    GET_VARIABLE( l, var, psz_name, ALHENA_VAR_FLOAT );   
+
+    return l->value.f_float;
 }
 
 int var_set_bool( variable_t *var, const char *psz_name,
