@@ -14,7 +14,7 @@ MODULES=modules/dummy.c modules/fi.c modules/peak.c \
 
 SOURCES+=$(MODULES)
 
-DESTDIR:=./
+DESTDIR?=./
 
 CFLAGS:=-c -O0 -g -Wall -ffreestanding -I./ -I./analyser -I$(LINUX_KERNEL)/include
 LDFLAGS:=-lm

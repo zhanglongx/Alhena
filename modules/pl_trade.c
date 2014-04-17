@@ -3,6 +3,9 @@
 
 #include "pl_trade.h"
 
+#define MAX1_DAYS   3
+#define MIN_DAYS    10
+
 typedef struct _pl_trade_t
 {
     int     i_open_day;
@@ -18,6 +21,8 @@ typedef struct _pl_trade_t
     float   f_loss;
     
 }pl_trade_t;
+
+void pl_trade_print( pl_trade_t *, alhena_data_t *, int , float );
 
 void *alhena_module_pl_trade_init( variable_t *p_config, 
                                    alhena_data_t *p_data, int i_total,
@@ -70,13 +75,21 @@ bool alhena_module_pl_trade_pos( void *h, alhena_data_t *p_data,
     float f_flag_start = p_pl->f_flag_start;
 
     if( i_day - p_pl->i_open_day > p_pl->i_max_days )
+    {
+        if( p_pl->b_open == true )
+            pl_trade_print( p_pl, p_data, i_day - 1, p_data->f_close[i_day - 1] );
+        
         return true;
+    }
 
-    if( (i_day - p_pl->i_open_day == 1) && p_data->f_open[i_day] > f_flag_close )
+    if( (i_day == p_pl->i_open_day + 1) && p_data->f_open[i_day] > f_flag_close )
         return true;
 
     if( p_pl->b_open == false )
     {
+        if( i_day - p_pl->i_open_day > MAX1_DAYS )
+            return true;
+        
         if( p_data->f_high[i_day] > f_flag_close * (1.0f + p_pl->f_start) )
         {
             p_pl->b_open = true;
@@ -86,26 +99,39 @@ bool alhena_module_pl_trade_pos( void *h, alhena_data_t *p_data,
             return false;
     }
 
+    // XXX: must opened if run here
+    if( i_day - p_pl->i_open_day > MIN_DAYS )
+    {
+        pl_trade_print( p_pl, p_data, i_day - 1, p_data->f_close[i_day - 1] );
+        return true;
+    }
+
     if( p_data->f_high[i_day] > f_flag_start * (1.0f + p_pl->f_loss) )
     {
-        fprintf( stdout, "pl-trade,%d/%d/%d,%.2f\n", 
-                         p_data->day[i_day].i_month,
-                         p_data->day[i_day].i_day,
-                         p_data->day[i_day].i_year,
-                         p_pl->f_loss ); // tempz!!
+        pl_trade_print( p_pl, p_data, i_day, f_flag_start * (1.0f + p_pl->f_loss) );
         return true;
     }
 
     if( p_data->f_low[i_day] < f_flag_start * (1.0f - p_pl->f_profile ) )
     {
-        fprintf( stdout, "pl-trade,%d/%d/%d,%.2f\n", 
-                         p_data->day[i_day].i_month,
-                         p_data->day[i_day].i_day,
-                         p_data->day[i_day].i_year,
-                         p_pl->f_profile * -1.0f ); // tempz!!
+        pl_trade_print( p_pl, p_data, i_day, f_flag_start * (1.0f - p_pl->f_profile ) );
         return true;
     }
 
     return false;
+}
+
+void pl_trade_print( pl_trade_t *p_pl, alhena_data_t *p_data, 
+                     int i_day, float f_finish )
+{
+    float f_delta = (f_finish - p_pl->f_flag_start) / p_pl->f_flag_start;
+
+    assert( p_pl->b_open );
+
+    fprintf( stdout, "pl-trade,%d/%d/%d,%.2f\n", 
+                     p_data->day[i_day].i_month,
+                     p_data->day[i_day].i_day,
+                     p_data->day[i_day].i_year,
+                     f_delta );
 }
 
