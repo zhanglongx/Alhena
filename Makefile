@@ -18,6 +18,8 @@ DESTDIR?=./
 
 CFLAGS:=-c -O0 -g -Wall -ffreestanding -I./ -I./analyser -I$(LINUX_KERNEL)/include
 LDFLAGS:=-lm
+DEPMT:=-MT
+DEPMM:=-MM -g0
 
 OBJECTS:=$(patsubst %.c,%.o,$(SOURCES))
 EXECUTABLE:=$(PROGRAM)
@@ -36,8 +38,17 @@ install: $(EXECUTABLE)
 uninstall:
 	$(VERBOSE) rm -f $(DESTDIR)/bin/$(EXECUTABLE)
 		
-$(EXECUTABLE): $(OBJECTS)
+$(EXECUTABLE): .depend $(OBJECTS)
 	$(VERBOSE) $(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 		
 %.o : %.c %.h
 	$(VERBOSE) $(CC) $(CFLAGS) $< -o $@
+
+.depend:
+	$(VERBOSE) rm -f .depend
+	$(VERBOSE) $(foreach SRC, $(SOURCES) $(MODULES), $(CC) $(CFLAGS) $(SRC) $(DEPMT) $(SRC:%.c=%.o) $(DEPMM) 1>> .depend;)
+
+depend: .depend
+ifneq ($(wildcard .depend),)
+include .depend
+endif
