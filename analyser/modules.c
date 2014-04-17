@@ -111,7 +111,7 @@ alhena_module_t *module_new( const char *psz_name,
 
     if( b_output )
     {
-        /* NOTE: msg_Err is enough */
+        /* msg_Err is enough */
         p_module->p_sys_data = calloc( 1, sizeof( float ) * MAX_DAYS );
         if( !p_module->p_sys_data )
             msg_Err( "can't alloc sys data for %s, turn off output", 

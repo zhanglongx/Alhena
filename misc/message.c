@@ -43,8 +43,8 @@ void msg_deinit()
 #endif
 }
 
-// NOTE: 1. this is *not* reentrantable now!!
-//       2. always print on stderr
+// XXX: 1. this is *not* reentrantable now!!
+//      2. always print on stderr
 void msg( int i_level, const char *psz_fmt, ... )
 {
     if( i_level >= g_print_level )

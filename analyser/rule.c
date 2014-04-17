@@ -43,7 +43,7 @@ int alhena_rule_init( alhena_t *h )
 
     psz_chain = sys_get_string( p_root, "stats" );
 
-    // NOTE: ignore stats failure
+    /* ignore stats failure */
     build_chain( h, &h->stats, psz_chain, 1, false );
 
     return ALHENA_EOK;

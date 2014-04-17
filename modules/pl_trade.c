@@ -112,7 +112,7 @@ bool alhena_module_pl_trade_pos( void *h, alhena_data_t *p_data,
         return true;
     }
 
-    if( p_data->f_low[i_day] < f_flag_start * (1.0f - p_pl->f_profile ) )
+    if( p_data->f_low[i_day] < f_flag_start * (1.0f - p_pl->f_profile) )
     {
         pl_trade_print( p_pl, p_data, i_day, f_flag_start * (1.0f - p_pl->f_profile ) );
         return true;

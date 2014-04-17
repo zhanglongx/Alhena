@@ -78,7 +78,7 @@ typedef struct _alhena_sys_t
 {
     char psz_name[ALHENA_MAX_SYS_NAME];
 
-    // NOTE: these callback ops *CAN* be NULL !
+    // XXX: these callback ops *CAN* be NULL !
     pf_sys_init_t        pf_sys_init;
     pf_sys_deinit_t      pf_sys_deinit;
 
