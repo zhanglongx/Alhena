@@ -81,7 +81,7 @@ void alhena_output( alhena_t *h )
         alhena_rule_output_day( h, i_day );
 
         fprintf( stdout, "%d,%d\n", p_data->open_flag[i_day],
-                                    p_data->close_flag[i_day] ? 123456 : 0 );
+                                    p_data->close_flag[i_day] );
     }
     
 }

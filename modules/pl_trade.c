@@ -3,7 +3,7 @@
 
 #include "pl_trade.h"
 
-#define MAX1_DAYS   3
+#define MAX1_DAYS   2
 #define MIN_DAYS    10
 
 typedef struct _pl_trade_t
@@ -90,7 +90,8 @@ bool alhena_module_pl_trade_pos( void *h, alhena_data_t *p_data,
         if( i_day - p_pl->i_open_day > MAX1_DAYS )
             return true;
         
-        if( p_data->f_high[i_day] > f_flag_close * (1.0f + p_pl->f_start) )
+        if( p_data->f_high[i_day] > f_flag_close * (1.0f + p_pl->f_start) && 
+            p_data->f_low[i_day] < f_flag_close * (1.0f + p_pl->f_start) )
         {
             p_pl->b_open = true;
             p_pl->f_flag_start = f_flag_start = f_flag_close * (1.0f + p_pl->f_start);
@@ -125,10 +126,14 @@ void pl_trade_print( pl_trade_t *p_pl, alhena_data_t *p_data,
                      int i_day, float f_finish )
 {
     float f_delta = (f_finish - p_pl->f_flag_start) / p_pl->f_flag_start;
+    int i_open_day = p_pl->i_open_day;
 
     assert( p_pl->b_open );
 
-    fprintf( stdout, "pl-trade,%d/%d/%d,%.2f\n", 
+    fprintf( stdout, "pl-trade,%d/%d/%d-%d/%d/%d,%.2f\n", 
+                     p_data->day[i_open_day].i_month,
+                     p_data->day[i_open_day].i_day,
+                     p_data->day[i_open_day].i_year,
                      p_data->day[i_day].i_month,
                      p_data->day[i_day].i_day,
                      p_data->day[i_day].i_year,
