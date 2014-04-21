@@ -13,5 +13,6 @@ alhena
 analyser/*.o
 misc/*.o
 modules/*.o
+extra/*.csv
 bin/
 view/
