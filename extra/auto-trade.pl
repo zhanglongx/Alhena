@@ -6,6 +6,7 @@ $CSV_PATH = defined($ARGV[0]) ? $ARGV[0] : "../bin/export";
 
 sub trade
 {
+    my ($profit, $loss) = @_;
     my @files = `find $CSV_PATH -name "*.csv"`;
     my $sum = 0;
     
