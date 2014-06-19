@@ -17,7 +17,7 @@ typedef struct _pl_trade_t
     int     i_max_days;
 
     float   f_start;
-    float   f_profile;
+    float   f_profit;
     float   f_loss;
     
 }pl_trade_t;
@@ -40,7 +40,7 @@ void *alhena_module_pl_trade_init( variable_t *p_config,
     p_pl->i_max_days = var_get_integer( p_config, "pl-trade-days" );
 
     p_pl->f_start   = var_get_float( p_config, "pl-trade-start" ) / 100.0f;
-    p_pl->f_profile = var_get_float( p_config, "pl-trade-profile" ) / 100.0f;
+    p_pl->f_profit = var_get_float( p_config, "pl-trade-profit" ) / 100.0f;
     p_pl->f_loss    = var_get_float( p_config, "pl-trade-loss"  ) / 100.0f;
 
     return p_pl;
@@ -113,9 +113,9 @@ bool alhena_module_pl_trade_pos( void *h, alhena_data_t *p_data,
         return true;
     }
 
-    if( p_data->f_low[i_day] < f_flag_start * (1.0f - p_pl->f_profile) )
+    if( p_data->f_low[i_day] < f_flag_start * (1.0f - p_pl->f_profit) )
     {
-        pl_trade_print( p_pl, p_data, i_day, f_flag_start * (1.0f - p_pl->f_profile ) );
+        pl_trade_print( p_pl, p_data, i_day, f_flag_start * (1.0f - p_pl->f_profit ) );
         return true;
     }
 

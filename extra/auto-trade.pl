@@ -14,7 +14,7 @@ sub trade
     {
         if( $file =~ m/[A-Za-z0-9]{8,8}\.csv/ )
         {
-            my @exe_alhena = `$ALHENA $ALHENA_ARG --pl-trade-start $start --pl-trade-profile $profit --pl-trade-loss $loss $file`;
+            my @exe_alhena = `$ALHENA $ALHENA_ARG --pl-trade-start $start --pl-trade-profit $profit --pl-trade-loss $loss $file`;
             
             foreach (@exe_alhena)
             {
