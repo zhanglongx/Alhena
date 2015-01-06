@@ -6,12 +6,14 @@
 /* TODO: include modules here */
 #include "modules/dummy.h"
 #include "modules/fi.h"
+#include "modules/fi_low.h"
 #include "modules/maxday.h"
 #include "modules/minday.h"
 #include "modules/no_upseri.h"
 #include "modules/pl_trade.h"
 
 #include "modules/peak.h"
+#include "modules/peak_low.h"
 
 #define MODULE_REGISTER_HELPER( foo, sys ) \
     alhena_modules_##foo##_register( (sys) );
@@ -47,12 +49,14 @@ int bank_collect()
     MODULE_REGISTER_HELPER( root,      &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( dummy,     &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( fi,        &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( filow,     &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( maxday,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( minday,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( no_upseri, &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( pl_trade,  &__g_sys_bank.sys[i_sys++] );
 
-    MODULE_REGISTER_HELPER( peak,  &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( peak,    &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( peaklow, &__g_sys_bank.sys[i_sys++] );
 
     assert( i_sys < ALHENA_MAX_SYS_NUMS );
     __g_sys_bank.i_sys = i_sys;

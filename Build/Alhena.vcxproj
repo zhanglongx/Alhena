@@ -88,10 +88,12 @@
     <ClCompile Include="..\misc\message.c" />
     <ClCompile Include="..\modules\dummy.c" />
     <ClCompile Include="..\modules\fi.c" />
+    <ClCompile Include="..\modules\fi_low.c" />
     <ClCompile Include="..\modules\maxday.c" />
     <ClCompile Include="..\modules\minday.c" />
     <ClCompile Include="..\modules\no_upseri.c" />
     <ClCompile Include="..\modules\peak.c" />
+    <ClCompile Include="..\modules\peak_low.c" />
     <ClCompile Include="..\modules\pl_trade.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -11,7 +11,9 @@
 static int g_print_level = _ALHENA_INF;
 static void (*g_print_callback)( int, const char *, va_list ) = NULL;
 
+#ifdef HAVE_SYSLOG_H
 static void syslog_cb( int i_level, const char *psz_fmt, va_list arg );
+#endif
 
 void msg_init( int i_log_level, int i_log_type )
 {
@@ -106,11 +108,6 @@ static void syslog_cb( int i_level, const char *psz_fmt, va_list arg )
         
         vsyslog( i_facility, psz_fmt, arg );
     }
-}
-#else
-static void syslog_cb( int i_level, const char *psz_fmt, va_list arg )
-{
-    
 }
 #endif
 

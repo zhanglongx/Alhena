@@ -1,6 +1,8 @@
 #ifndef _DATA_H_
 #define _DATA_H_
 
+#include <math.h>
+
 #define MAX_DAYS        (8192)      // almost 40 years
 
 typedef struct _alhena_data_t
@@ -25,12 +27,42 @@ typedef struct _alhena_data_t
 
 typedef int (*pf_compare_t)( const void *, const void * );
 
-ALHENA_INLINE float accel_v( float *f, int i_day )
+ALHENA_INLINE float _sum_v( float *f, int i_day, int i_length )
 {
-    if( i_day < 2 )
+    float sum = 0.0;
+    int i = i_day - i_length;
+
+    if( i < 0 )
         return 0.0;
 
-    return f[i_day] - f[i_day-1];
+    for( ; i<i_day; i++ )
+        sum += f[i];
+
+    return sum;
+}
+
+ALHENA_INLINE float avg_v( float *f, int i_day, int i_length )
+{
+    return _sum_v( f, i_day, i_length ) / i_length;
+}
+
+ALHENA_INLINE float dev_v( float *f, int i_day, int i_length )
+{
+    float avg = avg_v( f, i_day, i_length );
+    float square = 0.0;
+    int i = i_day - i_length;
+
+    if( i < 0 )
+        return 0.0;
+
+    for( ; i<i_day; i++ )
+        square += f[i] * f[i];
+
+    square = square / i_length - avg * avg;
+    if( square < 0.0 )
+        square *= -1.0f;
+
+    return sqrtf( square );
 }
 
 #define PAST_MAX_N_FLOAT( max, data, day, n ) \

@@ -72,5 +72,11 @@
     <ClCompile Include="..\modules\pl_trade.c">
       <Filter>modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\peak_low.c">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\fi_low.c">
+      <Filter>modules</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
