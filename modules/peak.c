@@ -1,6 +1,7 @@
 #include "analyser/common.h"
 #include "analyser/modules.h"
 
+#include "fi.h"
 #include "peak.h"
 
 typedef struct _peak_t
@@ -14,6 +15,10 @@ typedef struct _peak_t
         int     i_month;
         int     i_year;
     }day[MAX_DAYS];
+
+    float   fi[MAX_DAYS];
+
+    float   fi_dev[MAX_DAYS];
     
     bool    is_open_high[MAX_DAYS];
 
@@ -31,6 +36,7 @@ void *alhena_module_peak_init( variable_t *p_config, alhena_data_t *p_data,
                                int i_total, float *p_output_data )
 {
     peak_t *p_stat = NULL;
+    int i;
 
     p_stat = (peak_t *)calloc( 1, sizeof( peak_t ) );
     if( !p_stat )
@@ -38,6 +44,9 @@ void *alhena_module_peak_init( variable_t *p_config, alhena_data_t *p_data,
         msg_Err( "alloc peak_t failed" );
         return NULL;
     }
+
+    for( i=0; i<i_total; i++ )
+        p_stat->fi[i] = fi_v( p_data, i );
 
     p_stat->i_max_stat_days = var_get_integer( p_config, "peak-max-days" );
 
@@ -57,7 +66,12 @@ bool alhena_module_peak_record_pre( void *h, alhena_data_t *p_data,
     if( i_day >= i_end - 2 )
         return false;
 
+#define FI_LENGTH   (80)
+
     /* init */
+    p_stat->fi_dev[p_stat->i_records] = (p_stat->fi[i_day] - avg_v( p_stat->fi, i_day, FI_LENGTH ) )
+                                      / dev_v( p_stat->fi, i_day, FI_LENGTH );
+    
     is_open_high = p_data->f_open[i_day + 1] > f_flag_close;
 
     p_stat->is_open_high[p_stat->i_records] = is_open_high;
@@ -104,6 +118,7 @@ bool alhena_module_peak_record_pre( void *h, alhena_data_t *p_data,
     p_stat->i_records++;
 
     return true;
+#undef FI_LENGTH
 }
 
 void alhena_module_peak_deinit( void *h )
@@ -114,12 +129,13 @@ void alhena_module_peak_deinit( void *h )
     for( i=0; i<p_stat->i_records; i++ )
     {
         fprintf( stdout, "stat," );
-        fprintf( stdout, "%d/%d/%d,",
-                         p_stat->day[i].i_month,
-                         p_stat->day[i].i_day,
-                         p_stat->day[i].i_year );
-        fprintf( stdout, "%d,%f,%d,%f,%d,%f,%d\n", 
+        //fprintf( stdout, "%d/%d/%d,",
+        //                 p_stat->day[i].i_month,
+        //                 p_stat->day[i].i_day,
+        //                 p_stat->day[i].i_year );
+        fprintf( stdout, "%d,%f,%f,%d,%f,%d,%f,%d\n", 
                          p_stat->is_open_high[i],
+                         p_stat->fi_dev[i],
                          p_stat->highest1[i],
                          p_stat->highest_day1[i],
                          p_stat->lowest[i], 

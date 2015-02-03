@@ -20,7 +20,7 @@ typedef uint8_t        bool;
 #define true           1
 #define false          0
 #else
-#error  "not supported platform"
+#   error  "not supported platform"
 #endif
 
 #include "misc/message.h"
@@ -44,7 +44,7 @@ typedef uint8_t        bool;
 #   define ALHENA_SNPRINTF       _snprintf
 #   define ALHENA_STRDUP         _strdup
 #else
-#error  "not supported platform"
+#   error  "not supported platform"
 #endif
 
 #define  FLOAT_TOLERABLE            (0.001)

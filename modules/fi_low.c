@@ -64,7 +64,7 @@ bool alhena_module_filow_pos( void *h, alhena_data_t *p_data,
         return false;
 
 #define RATIO1   (4.0f)
-#define RATIO2   (6.0f)
+#define RATIO2   (4.0f)
 
     for( i=i_day - p_fi->i_look_back; i<i_day; i++ )
     {

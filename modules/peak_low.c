@@ -81,7 +81,7 @@ bool alhena_module_peaklow_record_pre( void *h, alhena_data_t *p_data,
     f_lowest = 8000.0;
     i_end = i_day + p_stat->highest_day[p_stat->i_records];
 
-    for( i=i_day+1; i<i_end; i++ )
+    for( i=i_day+1; i<=i_end; i++ )
     {
         if( p_data->f_low[i] < f_lowest )
         {
