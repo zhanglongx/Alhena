@@ -129,10 +129,10 @@ void alhena_module_peak_deinit( void *h )
     for( i=0; i<p_stat->i_records; i++ )
     {
         fprintf( stdout, "stat," );
-        //fprintf( stdout, "%d/%d/%d,",
-        //                 p_stat->day[i].i_month,
-        //                 p_stat->day[i].i_day,
-        //                 p_stat->day[i].i_year );
+        fprintf( stdout, "%d/%d/%d,",
+                         p_stat->day[i].i_month,
+                         p_stat->day[i].i_day,
+                         p_stat->day[i].i_year );
         fprintf( stdout, "%d,%f,%f,%d,%f,%d,%f,%d\n", 
                          p_stat->is_open_high[i],
                          p_stat->fi_dev[i],
