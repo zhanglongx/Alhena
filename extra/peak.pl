@@ -7,9 +7,8 @@ while(<>)
     $filename =~ m/([a-zA-Z]+[0-9]+)/;
     $filename = $1;
     
-    if( /^stat.*/ )
+    if( s/^stat,/$filename,/g )
     {
-        print "$filename,";
         print;
     }
 }
