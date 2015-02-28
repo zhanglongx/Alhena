@@ -140,13 +140,13 @@ sub find_entry_by_end
 sub fi
 {
     my ($i_entry) = @_;
-    my ($date2, , , ,$pclose2, $vol2) = @{$database[$i_entry]};
+    my ($date2, $popen2, $phigh2, $plow2, $pclose2, $vol2) = @{$database[$i_entry]};
     
     return 0.0  if( !$i_entry );
         
-    my ($date1, , , ,$pclose1, $vol1) = @{$database[$i_entry - 1]};
+    my ($date1, $popen1, $phigh1, $plow1, $pclose1, $vol1) = @{$database[$i_entry - 1]};
     
-    return $pclose1;
+    return $vol2 * ($pclose2 - $pclose1);
 }
 
 sub print_data
@@ -155,7 +155,8 @@ sub print_data
     my ($date, $popen, $phigh, $plow, $pclose, $vol, $mount) = @{$database[$i_entry]};
     my $pfi = fi($i_entry);
     
-    print "$date, $popen, $phigh, $plow, $pclose, $vol, $pfi\n";
+    print "$date, $popen, $phigh, $plow, $pclose, $vol, ";
+    printf "%.2f\n", $pfi;
 }
 
 open FH, "$data_filename" or die "can't open datafile: $!";
