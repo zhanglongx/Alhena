@@ -13,6 +13,7 @@ my $opt_start;
 my $opt_backward = 9;
 my $opt_forward = 32;
 my $opt_end;
+my $opt_m4hst;
 my $opt_path="../bin/export";
 
 GetOptions( "help"        => \$opt_help,  
@@ -20,6 +21,7 @@ GetOptions( "help"        => \$opt_help,
             "start=s"     => \$opt_start,
             "backward=i"  => \$opt_backward,
             "forward=i"   => \$opt_forward,
+            "m4hst=s"     => \$opt_m4hst,
             "path=s"      => \$opt_path,
            );
            
@@ -31,6 +33,7 @@ if( $opt_help || !defined($opt_name) )
     print "    -s, --start <6/13/1970>       start date\n";
     print "    -b, --backward <-9>           backward search\n";
     print "    -f, --forward <32>            forward search\n";
+    print "    -m, --m4hst <path>            m4 hst path\n";
     print "    -p, --path <path>             database path\n";
     
     exit(0);
@@ -137,26 +140,33 @@ sub find_entry_by_end
     return $i_entry >= @database? $i_entry-1 : $i_entry;
 }
 
-sub fi
-{
-    my ($i_entry) = @_;
-    my ($date2, $popen2, $phigh2, $plow2, $pclose2, $vol2) = @{$database[$i_entry]};
-    
-    return 0.0  if( !$i_entry );
-        
-    my ($date1, $popen1, $phigh1, $plow1, $pclose1, $vol1) = @{$database[$i_entry - 1]};
-    
-    return $vol2 * ($pclose2 - $pclose1);
-}
-
 sub print_data
 {
     my ($i_entry) = @_;
     my ($date, $popen, $phigh, $plow, $pclose, $vol, $mount) = @{$database[$i_entry]};
-    my $pfi = fi($i_entry);
     
-    print "$date, $popen, $phigh, $plow, $pclose, $vol, ";
-    printf "%.2f\n", $pfi;
+    $date =~ s#^(.*)/(.*)#$2/$1#;
+    
+    my ($year, $month, $day) = HTTP::Date::parse_date( $date );
+    
+    print "$year.$month.$day,$popen,$phigh,$plow,$pclose,$vol\n";
+}
+
+sub print_hst
+{
+    my ($wh, $i_entry) = @_;
+    my ($date, $popen, $phigh, $plow, $pclose, $vol, $mount) = @{$database[$i_entry]};
+    
+    $date =~ s#^(.*)/(.*)#$2/$1#;
+    
+    print $wh pack("I", HTTP::Date::str2time($date));
+    print $wh pack("I", 0);
+    print $wh pack("d", $popen);
+    print $wh pack("d", $phigh);
+    print $wh pack("d", $plow);
+    print $wh pack("d", $pclose);
+    print $wh pack("I", $vol);
+    print $wh pack("a16", "");
 }
 
 open FH, "$data_filename" or die "can't open datafile: $!";
@@ -175,10 +185,42 @@ close FH;
 
 my $i_start = find_entry_by_start( $opt_start );
 my $i_end   = find_entry_by_end( $opt_end );
+my $b_hst_open = 0;
 
 ($i_start || $i_end) or exit(1);
 
 foreach my $i_entry ($i_start..$i_end)
 {
-    print_data $i_entry;
+    if( defined($opt_m4hst) )
+    {
+        my $hst_filename = "$opt_m4hst/${opt_name}h1440.hst";
+        
+        if( !$b_hst_open )
+        {
+            open WH, ">$hst_filename" or die "can't open $hst_filename: $!";
+            binmode WH;
+            
+            print WH pack("I", 401);
+            print WH pack("a64", "(C)opyright 2015, Alhena data printer.");
+            print WH pack("a12", "${opt_name}h");
+            print WH pack("I", 1440);   # period
+            print WH pack("I", 5);      # digital
+            print WH pack("I", 0);      # time sign
+            print WH pack("I", 0);      # last sync
+            print WH pack("a52", "");   # unused
+            
+            $b_hst_open = 1;
+        }
+        
+        print_hst( \*WH, $i_entry );
+    }
+    else
+    {
+        print_data $i_entry;
+    }
+}
+
+if( $b_hst_open )
+{
+    close WH;
 }
