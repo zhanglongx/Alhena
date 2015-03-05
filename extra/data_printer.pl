@@ -1,4 +1,4 @@
-#! perl -w
+#! /usr/bin/perl -w
 
 use Getopt::Long;
 use File::Find;
@@ -31,7 +31,7 @@ if( $opt_help || !defined($opt_name) )
     print "    -h, --help                    print this message\n";
     print "    -n, --name <name>             specifiy the subject\n";
     print "    -s, --start <6/13/1970>       start date\n";
-    print "    -b, --backward <-9>           backward search\n";
+    print "    -b, --backward <9>            backward search\n";
     print "    -f, --forward <32>            forward search\n";
     print "    -m, --m4hst <path>            m4 hst path\n";
     print "    -p, --path <path>             database path\n";
@@ -193,7 +193,8 @@ foreach my $i_entry ($i_start..$i_end)
 {
     if( defined($opt_m4hst) )
     {
-        my $hst_filename = "$opt_m4hst/${opt_name}h1440.hst";
+        my $postfix = int rand(1000);
+        my $hst_filename = "$opt_m4hst/${opt_name}h${postfix}1440.hst";
         
         if( !$b_hst_open )
         {
@@ -202,7 +203,7 @@ foreach my $i_entry ($i_start..$i_end)
             
             print WH pack("I", 401);
             print WH pack("a64", "(C)opyright 2015, Alhena data printer.");
-            print WH pack("a12", "${opt_name}h");
+            print WH pack("a12", "${opt_name}h${postfix}");
             print WH pack("I", 1440);   # period
             print WH pack("I", 5);      # digital
             print WH pack("I", 0);      # time sign
