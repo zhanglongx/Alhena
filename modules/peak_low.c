@@ -11,9 +11,9 @@ typedef struct _peak_low_t
 
     float   fi[MAX_DAYS];
 
-    int     up_days[MAX_DAYS];
-    float   go_down[MAX_DAYS];
-    int     go_days[MAX_DAYS];
+    int     up_days[MAX_DAYS];          /* up days before fi up */
+    float   go_down[MAX_DAYS];          /* avg value go down between fi up and fi down */
+    int     go_days[MAX_DAYS];          /* days between fi up and fi down */
     
     /* each record have a slot */
     struct {
@@ -22,14 +22,14 @@ typedef struct _peak_low_t
         int     i_year;
     }day[MAX_DAYS];
     
-    float   lowest1[MAX_DAYS];
-    int     lowest_day1[MAX_DAYS];
+    float   lowest1[MAX_DAYS];          /* first lowest value after happens */
+    int     lowest_day1[MAX_DAYS];      /* first lowest value's day */
 
-    float   highest[MAX_DAYS];
-    int     highest_day[MAX_DAYS];
+    float   highest[MAX_DAYS];          /* highest value after happens */
+    int     highest_day[MAX_DAYS];      /* highest value's day */
 
-    float   lowest2[MAX_DAYS];
-    int     lowest_day2[MAX_DAYS];
+    float   lowest2[MAX_DAYS];          /* reserved */
+    int     lowest_day2[MAX_DAYS];      /* reserved */
 }peak_low_t;
 
 void *alhena_module_peaklow_init( variable_t *p_config, alhena_data_t *p_data,

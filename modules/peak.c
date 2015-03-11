@@ -20,16 +20,16 @@ typedef struct _peak_t
 
     float   fi_dev[MAX_DAYS];
     
-    bool    is_open_high[MAX_DAYS];
+    bool    is_open_high[MAX_DAYS];     /* is high after happens */
 
-    float   highest1[MAX_DAYS];
-    int     highest_day1[MAX_DAYS];
+    float   highest1[MAX_DAYS];         /* first highest value after happens */
+    int     highest_day1[MAX_DAYS];     /* first highest value's day */
 
-    float   lowest[MAX_DAYS];
-    int     lowest_day[MAX_DAYS];
+    float   lowest[MAX_DAYS];           /* lowest value after happens */
+    int     lowest_day[MAX_DAYS];       /* lowest value's day */
 
-    float   highest2[MAX_DAYS];
-    int     highest_day2[MAX_DAYS];
+    float   highest2[MAX_DAYS];         /* second highest value after happens */
+    int     highest_day2[MAX_DAYS];     /* second highest value's day */
 }peak_t;
 
 void *alhena_module_peak_init( variable_t *p_config, alhena_data_t *p_data,
