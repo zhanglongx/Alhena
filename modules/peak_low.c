@@ -13,6 +13,7 @@ typedef struct _peak_low_t
 
     int     up_days[MAX_DAYS];
     float   go_down[MAX_DAYS];
+    int     go_days[MAX_DAYS];
     
     /* each record have a slot */
     struct {
@@ -80,6 +81,8 @@ bool alhena_module_peaklow_record_pre( void *h, alhena_data_t *p_data,
 
     assert( i_start );
 
+    p_stat->go_days[i_record] = i_day - i_start;
+
     for( i=1; i < i_start; i++ )
     {
         if( p_data->f_close[i_start - i] > p_data->f_close[i_start - i + 1] )
@@ -145,9 +148,10 @@ void alhena_module_peaklow_deinit( void *h )
                          p_stat->day[i].i_month,
                          p_stat->day[i].i_day,
                          p_stat->day[i].i_year );
-        fprintf( stdout, "%d,%f,%f,%d,%f\n",
+        fprintf( stdout, "%d,%f,%d,%f,%d,%f\n",
                          p_stat->up_days[i],
                          p_stat->go_down[i],
+                         p_stat->go_days[i],
                          p_stat->lowest1[i],
                          p_stat->lowest_day1[i],
                          p_stat->highest[i] );
