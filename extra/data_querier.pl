@@ -22,6 +22,14 @@ if( $opt_help )
     print "    -p, --path <path>             database path\n";
 }
 
+# get local time for query_data() and query_xdr()
+my ($loc_sec, $loc_min, $loc_hour, $loc_day, $loc_mon, $loc_year) = localtime();
+
+$loc_year += 1900;
+$loc_mon  += 1;
+my $loc_season = int( $loc_mon / 4 ) + 1;
+# print "$loc_year-$loc_mon-$loc_day, season: $loc_season\n";
+
 sub delta_days_wrapper
 {
     my ($date1, $date2) = @_;
@@ -54,6 +62,7 @@ sub delta_days_wrapper
 
 my $cookie_file="cookies_f.txt";
 
+# XXX: @database @old_database @xdr_info @old_xdr_info: [oldest] ... [newest]
 my @database;
 
 sub query_data
@@ -164,9 +173,11 @@ sub query_xdr{
         {
             $entry{'date'} = $2;
             
-            next  if( $2 eq '--' );
+            # if n/a or not implemented
+            next  if( $2 eq '--' || delta_days_wrapper( "$loc_year-$loc_mon-$loc_day", $entry{'date'} ) > 0 );
             
-            last  if( defined( $last_date ) && $last_date eq $2 ); # already had
+            # already had
+            last  if( defined( $last_date ) && $last_date eq $2 );
             
             if( $piece =~ m#<td>\d+-\d+-\d+</td>\s+<td>([.0-9]+)</td>\s+<td>([.0-9]+)</td>\s+<td>([.0-9]+)</td># )
             {
@@ -179,6 +190,8 @@ sub query_xdr{
             }
         }
     }
+    
+    @xdr_info = reverse @xdr_info;
 }
 
 sub do_xdr
@@ -193,8 +206,9 @@ sub xdr_one_day
     my ($entry) = @_;
     my %one_day = %$entry;
 
-    foreach my $xdr (@xdr_info)
+    for (my $i = @xdr_info - 1; $i >= 0; $i--)
     {
+        my $xdr = $xdr_info[$i];
         my %xdr_one = %$xdr;
         
         if( delta_days_wrapper( $one_day{'date'}, $xdr_one{'date'} ) >= 0 )
@@ -219,14 +233,13 @@ sub read_old
     my $end_month  = 1;
     my $end_day    = 1;
     my $end_season = 1;
-    my $found_end  = 0;
     
     open FH, "$filename" or die "can't open $filename for read: $!";
     
     while(<FH>)
     {
         # xdr info
-        if( /^#\s+(\d+-\d+-\d+)\s+([.0-9]+)\s+([.0-9]+)\s+([.0-9]+)/ )
+        if( /^#\s+(\d+-\d+-\d+),([.0-9]+),([.0-9]+),([.0-9]+)/ )
         {
             my %one_xdr;
             
@@ -239,7 +252,7 @@ sub read_old
         }
         
         # real data
-        if( /([0-9]+-[0-9]+-[0-9]+)\s+([0-9]+\.[0-9]+)\s+([0-9]+\.[0-9]+)\s+([0-9]+\.[0-9]+)\s+([0-9]+\.[0-9]+)\s+([0-9]+)/ )
+        if( /([0-9]+-[0-9]+-[0-9]+),([0-9]+\.[0-9]+),([0-9]+\.[0-9]+),([0-9]+\.[0-9]+),([0-9]+\.[0-9]+),([0-9]+)/ )
         {
             my $date = $1;
             my %one_day;
@@ -251,22 +264,24 @@ sub read_old
             $one_day{'close'} = $5;
             $one_day{'vol'}   = $6;
             
-            if( $found_end == 0 && $date =~ /([0-9]+)-([0-9]+)-([0-9]+)/ )
-            {
-                $end_year  = $1;
-                $end_month = $2;
-                $end_day   = $3;
-                
-                $end_season = int( $end_month / 4 ) + 1;
-                
-                $found_end = 1;
-            }
-            
             push @old_database, \%one_day;
         }
     }
     
     close FH;
+    
+    if( scalar @old_database )
+    {
+        my $p_entry = $old_database[@old_database - 1];
+        my %one_entry = %$p_entry;
+        
+        if( $one_entry{'date'} =~ m/(\d+)-(\d+)-(\d+)/ )
+        {
+            ($end_year, $end_month, $end_day) = ($1, $2, $3);
+            
+            $end_season = int( $end_month / 4 ) + 1;
+        }
+    }
     
     return ($end_year, $end_month, $end_day, $end_season);
 }
@@ -278,51 +293,44 @@ sub write_new
     open WH, ">$filename" or die "can't open $filename for write: $!";
     
     # start with xdr info
-    foreach my $p_xdr_one (@xdr_info)
-    {
-        my %xdr_one = %$p_xdr_one;
-        
-        print WH "# $xdr_one{'date'} $xdr_one{'gift'} $xdr_one{'donation'} $xdr_one{'bouns'}\n";
-    }
-    
     foreach my $p_xdr_one (@old_xdr_info)
     {
         my %xdr_one = %$p_xdr_one;
         
-        print WH "# $xdr_one{'date'} $xdr_one{'gift'} $xdr_one{'donation'} $xdr_one{'bouns'}\n";
+        print WH "# $xdr_one{'date'},$xdr_one{'gift'},$xdr_one{'donation'},$xdr_one{'bouns'}\n";
     }
     
-    # newest first
-    foreach my $entry (@database)
+    foreach my $p_xdr_one (@xdr_info)
     {
-        my $p_one_day = xdr_one_day $entry;
-        my %one_day   = %$p_one_day;
+        my %xdr_one = %$p_xdr_one;
         
-        print WH "$one_day{'date'} ";
-        printf WH "%.2f %.2f %.2f %.2f %d\n",
-                  $one_day{'open'}, $one_day{'high'}, $one_day{'low'}, $one_day{'close'}, $one_day{'vol'};
+        print WH "# $xdr_one{'date'},$xdr_one{'gift'},$xdr_one{'donation'},$xdr_one{'bouns'}\n";
     }
     
-    # then old
+    # old one first
     foreach my $entry (@old_database)
     {
         my $p_one_day = xdr_one_day $entry;
         my %one_day   = %$p_one_day;
         
-        print WH "$one_day{'date'} ";
-        printf WH "%.2f %.2f %.2f %.2f %d\n",
+        print WH "$one_day{'date'},";
+        printf WH "%.2f,%.2f,%.2f,%.2f,%d\n",
+                  $one_day{'open'}, $one_day{'high'}, $one_day{'low'}, $one_day{'close'}, $one_day{'vol'};
+    }
+    
+    # then newest
+    foreach my $entry (@database)
+    {
+        my $p_one_day = xdr_one_day $entry;
+        my %one_day   = %$p_one_day;
+        
+        print WH "$one_day{'date'},";
+        printf WH "%.2f,%.2f,%.2f,%.2f,%d\n",
                   $one_day{'open'}, $one_day{'high'}, $one_day{'low'}, $one_day{'close'}, $one_day{'vol'};
     }
     
     close WH;
 }
-
-my ($loc_sec, $loc_min, $loc_hour, $loc_day, $loc_mon, $loc_year) = localtime();
-
-$loc_year += 1900;
-$loc_mon  += 1;
-my $loc_season = int( $loc_mon / 4 ) + 1;
-# print "$loc_year-$loc_mon-$loc_day, season: $loc_season\n";
 
 sub find_datafile {
     
@@ -353,9 +361,12 @@ sub find_datafile {
             }
         }
         
+        # reorder: [oldest] ... [newest]
+        @database = reverse @database;
+        
         if( scalar @old_xdr_info )
         {
-            my $p_xdr_one = $old_xdr_info[0];
+            my $p_xdr_one = $old_xdr_info[@old_xdr_info - 1];
             my %xdr_one = %$p_xdr_one;
             
             query_xdr $stock, $xdr_one{'date'};

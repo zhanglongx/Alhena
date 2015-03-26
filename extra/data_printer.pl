@@ -43,8 +43,6 @@ sub parse_date_wrapper
 {
     my ($date) = @_;
     
-    $date =~ s#^(.*)/(.*)#$2/$1#;
-    
     return HTTP::Date::parse_date( $date );
 }
 
@@ -65,10 +63,10 @@ sub add_days_wrapper
     
     ($year,$month,$day) = Date::Calc::Add_Delta_Days($year, $month, $day, $delta);
     
-    return "$month/$day/$year";
+    return "$year-$month-$day";
 }
 
-$opt_start="6/13/1970"   if( !defined($opt_start) );
+$opt_start="1970-6-13"   if( !defined($opt_start) );
 $opt_backward = -1 * $opt_backward;
 
 my ($opt_year) = parse_date_wrapper($opt_start);
@@ -84,7 +82,7 @@ sub find_datafile {
     
     my $file = fileparse( $File::Find::name );
     
-    if( $file =~ m/^SH$opt_name\.csv/i )
+    if( $file =~ m/$opt_name\.csv/i )
     {
         $data_filename = "$opt_path/$file";
         #print $data_filename;
@@ -143,19 +141,17 @@ sub find_entry_by_end
 sub print_data
 {
     my ($i_entry) = @_;
-    my ($date, $popen, $phigh, $plow, $pclose, $vol, $mount) = @{$database[$i_entry]};
-    
-    $date =~ s#^(.*)/(.*)#$2/$1#;
+    my ($date, $popen, $phigh, $plow, $pclose, $vol) = @{$database[$i_entry]};
     
     my ($year, $month, $day) = HTTP::Date::parse_date( $date );
     
-    print "$year.$month.$day,$popen,$phigh,$plow,$pclose,$vol\n";
+    print "$year-$month-$day,$popen,$phigh,$plow,$pclose,$vol\n";
 }
 
 sub print_hst
 {
     my ($wh, $i_entry) = @_;
-    my ($date, $popen, $phigh, $plow, $pclose, $vol, $mount) = @{$database[$i_entry]};
+    my ($date, $popen, $phigh, $plow, $pclose, $vol) = @{$database[$i_entry]};
     
     $date =~ s#^(.*)/(.*)#$2/$1#;
     
@@ -173,9 +169,9 @@ open FH, "$data_filename" or die "can't open datafile: $!";
 
 while(<FH>)
 {
-    if( /(.*),(.*),(.*),(.*),(.*),(.*),(.*)/ )
+    if( /(.*),(.*),(.*),(.*),(.*),(.*)/ )
     {
-        my @entry = ($1, $2, $3, $4, $5, $6, $7);
+        my @entry = ($1, $2, $3, $4, $5, $6);
         
         push @database, \@entry;
     }
