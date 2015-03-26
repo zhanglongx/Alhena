@@ -9,7 +9,7 @@ use HTTP::Cookies;
 use LWP::UserAgent;
 
 my $opt_help;
-my $opt_path="./test";
+my $opt_path="../database";
 
 GetOptions( "help"        => \$opt_help,  
             "path=s"      => \$opt_path,

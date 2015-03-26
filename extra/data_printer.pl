@@ -14,7 +14,7 @@ my $opt_backward = 9;
 my $opt_forward = 32;
 my $opt_end;
 my $opt_m4hst;
-my $opt_path="../bin/export";
+my $opt_path="../database";
 
 GetOptions( "help"        => \$opt_help,  
             "name=s"      => \$opt_name,
