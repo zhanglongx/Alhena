@@ -144,10 +144,10 @@ void alhena_module_peaklow_deinit( void *h )
     for( i=0; i<p_stat->i_records; i++ )
     {
         fprintf( stdout, "stat," );
-        fprintf( stdout, "%d/%d/%d,",
+        fprintf( stdout, "%d-%02d-%02d,",
+                         p_stat->day[i].i_year,
                          p_stat->day[i].i_month,
-                         p_stat->day[i].i_day,
-                         p_stat->day[i].i_year );
+                         p_stat->day[i].i_day );
         fprintf( stdout, "%d,%f,%d,%f,%d,%f\n",
                          p_stat->up_days[i],
                          p_stat->go_down[i],

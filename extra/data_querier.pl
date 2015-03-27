@@ -185,6 +185,9 @@ sub query_xdr{
                 $entry{'donation'} = $2;
                 $entry{'bouns'}    = $3;
                 
+                # FIXME: !!
+                last  if( $entry{'bouns'} > 100 );
+                
                 # print "$entry{'date'} $entry{'gift'} $entry{'donation'} $entry{'bouns'}\n";
                 push @xdr_info, \%entry;
             }

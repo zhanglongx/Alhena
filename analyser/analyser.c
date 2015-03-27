@@ -68,10 +68,10 @@ void alhena_output( alhena_t *h )
     
     for( i_day=0; i_day<h->i_days; i_day++ )
     {
-        fprintf( stdout, "%2d/%2d/%d,%.2f,%.2f,%.2f,%.2f,%lld,",
+        fprintf( stdout, "%d-%02d-%02d,%.2f,%.2f,%.2f,%.2f,%lld,",
+                         p_data->day[i_day].i_year,             
                          p_data->day[i_day].i_month, 
                          p_data->day[i_day].i_day,
-                         p_data->day[i_day].i_year,
                          p_data->f_open[i_day],
                          p_data->f_high[i_day],
                          p_data->f_low[i_day],
@@ -114,19 +114,18 @@ static int load_data( alhena_t *h )
     while( !feof( fp ) )
     {
 #define GET_LINE_MAX    (512)
-        float foo;
         char line[GET_LINE_MAX];
 
         fgets( line, GET_LINE_MAX, fp );
-        if ( 9 == sscanf( line, "%d/%d/%d,%f,%f,%f,%f,%lld,%f", 
+        if ( 8 == sscanf( line, "%d-%d-%d,%f,%f,%f,%f,%lld,%f", 
+                                &p_data->day[i_days].i_year,
                                 &p_data->day[i_days].i_month, 
                                 &p_data->day[i_days].i_day,
-                                &p_data->day[i_days].i_year,
                                 &p_data->f_open[i_days],
                                 &p_data->f_high[i_days],
                                 &p_data->f_low[i_days],
                                 &p_data->f_close[i_days],
-                                &p_data->l_vol[i_days], &foo ) )
+                                &p_data->l_vol[i_days] ) )
         {
             i_days++;
         }
@@ -142,7 +141,7 @@ static int load_data( alhena_t *h )
 
     if( !i_days )
     {
-        msg_Err( "% doesn't contain any data", psz_filename );
+        msg_Err( "%s doesn't contain any data", psz_filename );
         return -1;
     }
 

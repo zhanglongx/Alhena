@@ -7,6 +7,7 @@ Build/*.user
 Build/Debug/
 Build/Release/
 Build/ipch/
+bin/hst
 
 alhena
 *.o
@@ -14,6 +15,5 @@ alhena
 *.csv
 cookies_f.txt
 
-bin/
 database/
 view/
