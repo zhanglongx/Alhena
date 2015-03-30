@@ -1,7 +1,7 @@
 #ifndef _ALHENA_H_
 #define _ALHENA_H_
 
-#ifdef __linux__
+#if defined(__linux__) || defined (__APPLE__)
 #   include <inttypes.h>
 #   include <stdbool.h>
 #   include <limits.h>
@@ -37,7 +37,7 @@ typedef uint8_t        bool;
 #define  MIN(a, b)    ((a) < (b) ? (a) : (b))
 #define  MAX(a, b)    ((a) > (b) ? (a) : (b))
 
-#ifdef __linux__
+#if defined(__linux__) || defined (__APPLE__)
 #   define ALHENA_SNPRINTF       snprintf
 #   define ALHENA_STRDUP         strdup
 #elif defined(_MSC_VER)
