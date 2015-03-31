@@ -78,5 +78,8 @@
     <ClCompile Include="..\modules\fi_low.c">
       <Filter>modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\now.c">
+      <Filter>modules</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

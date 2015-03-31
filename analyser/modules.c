@@ -10,6 +10,7 @@
 #include "modules/maxday.h"
 #include "modules/minday.h"
 #include "modules/no_upseri.h"
+#include "modules/now.h"
 #include "modules/pl_trade.h"
 
 #include "modules/peak.h"
@@ -53,6 +54,7 @@ int bank_collect()
     MODULE_REGISTER_HELPER( maxday,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( minday,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( no_upseri, &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( now,       &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( pl_trade,  &__g_sys_bank.sys[i_sys++] );
 
     MODULE_REGISTER_HELPER( peak,    &__g_sys_bank.sys[i_sys++] );

@@ -91,6 +91,7 @@
     <ClCompile Include="..\modules\fi_low.c" />
     <ClCompile Include="..\modules\maxday.c" />
     <ClCompile Include="..\modules\minday.c" />
+    <ClCompile Include="..\modules\now.c" />
     <ClCompile Include="..\modules\no_upseri.c" />
     <ClCompile Include="..\modules\peak.c" />
     <ClCompile Include="..\modules\peak_low.c" />
