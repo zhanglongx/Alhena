@@ -39,6 +39,7 @@ typedef struct _alhena_data_t
     float   f_high[MAX_DAYS];
 
     uint64_t l_vol[MAX_DAYS];
+    uint64_t l_equity[MAX_DAYS];
 
     bool    open_flag[MAX_DAYS];
     bool    close_flag[MAX_DAYS];

@@ -137,7 +137,7 @@ static int load_data( alhena_t *h )
         char line[GET_LINE_MAX];
 
         fgets( line, GET_LINE_MAX, fp );
-        if ( 8 == sscanf( line, "%d-%d-%d,%f,%f,%f,%f,%lld,%f", 
+        if ( 9 == sscanf( line, "%d-%d-%d,%f,%f,%f,%f,%lld,%lld", 
                                 &p_data->day[i_days].i_year,
                                 &p_data->day[i_days].i_month, 
                                 &p_data->day[i_days].i_day,
@@ -145,7 +145,8 @@ static int load_data( alhena_t *h )
                                 &p_data->f_high[i_days],
                                 &p_data->f_low[i_days],
                                 &p_data->f_close[i_days],
-                                &p_data->l_vol[i_days] ) )
+                                &p_data->l_vol[i_days],
+                                &p_data->l_equity[i_days] ) )
         {
             i_days++;
         }
