@@ -10,6 +10,7 @@ Build/ipch/
 bin/hst
 
 alhena
+.DS_Store
 *.o
 *.patch
 *.csv

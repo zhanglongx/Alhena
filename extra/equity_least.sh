@@ -1,7 +1,8 @@
 #! /bin/bash
 data_dir=../database
 
-FILES="$data_dir/000001.csv $data_dir/000002.csv $data_dir/000004.csv"
+#FILES="$data_dir/000001.csv $data_dir/000002.csv $data_dir/000004.csv"
+FILES=`find $data_dir -name "*.csv"`
 
 rm -f merge.csv
 

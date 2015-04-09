@@ -11,7 +11,7 @@ use threads;
 
 my $opt_help;
 my $opt_threadnum = 3;
-my $opt_equity = 0;
+my $opt_equity = 1;
 my $opt_path="../database";
 
 GetOptions( "help"        => \$opt_help,  
@@ -24,8 +24,8 @@ if( $opt_help )
 {
     print "data_querier [options]\n";
     print "    -h, --help                    print this message\n";
-    print "    -e, --equity                  enable equity\n";
-    print "    -t, --threadnum <num>         thread num (1,2,3)\n";
+    print "    -e, --equity                  enable equity [$opt_equity]\n";
+    print "    -t, --threadnum <num>         thread num (1,2,3) [$opt_threadnum]\n";
     print "    -p, --path <path>             database path\n";
     exit(0);
 }
