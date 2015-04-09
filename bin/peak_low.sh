@@ -18,7 +18,7 @@ data_dir=../database
 out_dir=./result
 
 # clean last result
-rm -rf result.csv
+rm -f result.csv
 find $out_dir -name "*.csv" -exec rm -f {} \;
 
 is_hst="no"
@@ -50,7 +50,7 @@ do
     cat $out_file | sed -n "s/^stat,/$name,/gp" >> result.csv
 done
 
-if [ "$is_hst" = "yes" ]; then
+if [ $is_hst = yes ]; then
     cat result.csv \
         | awk -F ',' '{printf "../extra/data_printer.pl -n %s -s %s -b 20 -m ./hst/ \n", \
                                     $1, $2}' \
