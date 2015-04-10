@@ -45,7 +45,7 @@ typedef uint8_t        bool;
 
 #include "misc/message.h"
 
-#define  ALHENA_VERSION             "1.4.1"
+#define  ALHENA_VERSION             "1.4.7"
 #define  ALHENA_MAX_FILENAME        1024
 
 #define  ALHENA_EOK                 (-0)
