@@ -33,4 +33,4 @@ do
     cat $out_file | sed -n "s/^now,/$name,/gp" >> result.csv
 done
 
-cat result.csv
+cat result.csv | sort -nrt '-' -k 3
