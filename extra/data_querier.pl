@@ -14,10 +14,10 @@ my $opt_threadnum = 3;
 my $opt_equity = 1;
 my $opt_path="../database";
 
-GetOptions( "help"        => \$opt_help,  
-            "equity"      => \$opt_equity,
-            "thread=i"    => \$opt_threadnum,
-            "path=s"      => \$opt_path,
+GetOptions( "help"         => \$opt_help,  
+            "equity"       => \$opt_equity,
+            "threadnum=i"  => \$opt_threadnum,
+            "path=s"       => \$opt_path,
            );
 
 if( $opt_help )
