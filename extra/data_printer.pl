@@ -141,11 +141,11 @@ sub find_entry_by_end
 sub print_data
 {
     my ($i_entry) = @_;
-    my ($date, $popen, $phigh, $plow, $pclose, $vol) = @{$database[$i_entry]};
+    my ($date, $popen, $phigh, $plow, $pclose, $vol, $equity) = @{$database[$i_entry]};
     
     my ($year, $month, $day) = HTTP::Date::parse_date( $date );
     
-    print "$year-$month-$day,$popen,$phigh,$plow,$pclose,$vol\n";
+    print "$year-$month-$day,$popen,$phigh,$plow,$pclose,$vol,$equity\n";
 }
 
 sub print_hst
@@ -169,9 +169,9 @@ open FH, "$data_filename" or die "can't open datafile: $!";
 
 while(<FH>)
 {
-    if( /(.*),(.*),(.*),(.*),(.*),(.*)/ )
+    if( /(.*),(.*),(.*),(.*),(.*),(.*),(.*)/ )
     {
-        my @entry = ($1, $2, $3, $4, $5, $6);
+        my @entry = ($1, $2, $3, $4, $5, $6, $7);
         
         push @database, \@entry;
     }
@@ -220,4 +220,21 @@ foreach my $i_entry ($i_start..$i_end)
 if( $b_hst_open )
 {
     close WH;
+}
+
+# statistic
+if( !defined($opt_m4hst) )
+{
+    my $p_first = $database[$i_start];
+    my $p_last  = $database[$i_end];
+    
+    my $start_v = $p_first->[4];
+    my $last_v  = $p_last->[4];
+    
+    my $delta   = $last_v - $start_v;
+    
+    my $equity  = $p_first->[6];
+    my $mount   = $last_v * $equity;
+    
+    print "statistic,$delta,$mount\n";
 }
