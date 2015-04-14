@@ -134,7 +134,7 @@ static int load_data( alhena_t *h )
     while( !feof( fp ) )
     {
 #define GET_LINE_MAX    (512)
-        char line[GET_LINE_MAX];
+        char line[GET_LINE_MAX] = {'\0'};
 
         fgets( line, GET_LINE_MAX, fp );
         if ( 9 == sscanf( line, "%d-%d-%d,%f,%f,%f,%f,%lld,%lld", 

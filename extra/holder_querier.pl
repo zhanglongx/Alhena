@@ -21,7 +21,7 @@ GetOptions( "help"         => \$opt_help,
 
 if( $opt_help )
 {
-    print "data_querier [options]\n";
+    print "holder_querier [options]\n";
     print "    -h, --help                    print this message\n";
     print "    -t, --threadnum <num>         thread num (1,2,3) [$opt_threadnum]\n";
     print "    -p, --path <path>             database path\n";
