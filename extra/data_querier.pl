@@ -58,7 +58,7 @@ sub parse_date
     }
     else
     {
-        return (2000, 1, 1);
+        return (2007, 1, 1);
     }
 }
 
@@ -91,6 +91,7 @@ sub write_new;
 sub get_url;
 sub query_xdr;
 sub xdr_daily;
+sub xdr_old_all;
 sub query_daily;
 sub get_daily;
 sub query_equity;
@@ -162,6 +163,8 @@ sub process
         
         query_xdr ($stock, \@xdr_info, $loc_date);
         
+        xdr_old_all( \@xdr_info, \@daily );
+        
         get_daily ( $stock, \@xdr_info, \@daily, $loc_date );
         
         get_equity( $stock, \@daily );
@@ -191,12 +194,14 @@ sub read_old
         if( /^#\s+(\d+-\d+-\d+),([.0-9]+),([.0-9]+),([.0-9]+)/ )
         {
             my %one_xdr;
-            
+
             $one_xdr{'date'}     = $1;
             $one_xdr{'gift'}     = $2;
             $one_xdr{'donation'} = $3;
             $one_xdr{'bouns'}    = $4;
             
+            $one_xdr{'new'}      = 0;
+                        
             push @$p_xdr_info, \%one_xdr;
         }
         
@@ -333,6 +338,8 @@ sub query_xdr
                 $entry{'donation'} = $2;
                 $entry{'bouns'}    = $3;
                 
+                $entry{'new'}      = 1;
+                
                 # FIXME: !!
                 last  if( $entry{'bouns'} > 100 );
                 
@@ -349,7 +356,7 @@ sub query_xdr
 
 sub xdr_daily
 {
-    my ($p_xdr_info, $p_entry) = @_;
+    my ($p_xdr_info, $p_entry, $b_check) = @_;
     my @tmp_xdr;
     
     foreach my $p_one_xdr (@$p_xdr_info)
@@ -365,6 +372,8 @@ sub xdr_daily
         my ($daily_date, $f_open, $f_high, $f_low, $f_close);
         my ($date, $bouns, $gift, $donation);
         
+        last if ( $b_check && !$p_one_xdr->{'new'} ); # older can't be new
+        
         $daily_date = $p_entry->{'date'};
         $f_open     = $p_entry->{'open'};
         $f_high     = $p_entry->{'high'};
@@ -376,12 +385,22 @@ sub xdr_daily
         $gift     = $p_one_xdr->{'gift'};
         $donation = $p_one_xdr->{'donation'};
         
-        next if ( delta_days_wrapper( $daily_date, $date ) < 0 );
+        last if ( delta_days_wrapper( $daily_date, $date ) < 0 );
         
         $p_entry->{'open'}  = do_xdr $f_open,  $bouns, $gift, $donation;  
         $p_entry->{'high'}  = do_xdr $f_high,  $bouns, $gift, $donation;
         $p_entry->{'low'}   = do_xdr $f_low,   $bouns, $gift, $donation;
         $p_entry->{'close'} = do_xdr $f_close, $bouns, $gift, $donation;     
+    }
+}
+
+sub xdr_old_all
+{
+    my ($p_xdr_info, $p_daily) = @_;
+    
+    foreach my $p_entry (@$p_daily)
+    {
+        xdr_daily $p_xdr_info, $p_entry, 1;
     }
 }
 
@@ -424,7 +443,7 @@ sub query_daily
             next;
         }
         
-        xdr_daily $p_xdr_info, \%one_day;
+        xdr_daily $p_xdr_info, \%one_day, 0;
         
         $one_day{'equity'} = 0; # in case no query_equity
         
@@ -455,9 +474,9 @@ sub get_daily
     }
     else
     {
-        $end_year   = 2000;
+        $end_year   = 2007;
         $end_season = 1;
-        $end_date   = "2000-1-1";
+        $end_date   = "2007-1-1";
     }
     
     my @tmp_daily; # [newest] ... [oldest]

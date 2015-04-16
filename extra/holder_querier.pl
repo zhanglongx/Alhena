@@ -198,7 +198,7 @@ sub get_url
 sub query_holder
 {
     my ($stock, $p_holder_info) = @_;
-    my $url_addr = "http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CirculateStockHolder/stockid/$stock/displaytype/100.phtml";
+    my $url_addr = "http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CirculateStockHolder/stockid/$stock/displaytype/400.phtml";
     
     my $content = get_url $url_addr;
  
