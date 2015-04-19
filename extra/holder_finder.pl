@@ -93,15 +93,17 @@ sub main
     
     foreach my $p_result (@results)
     {
-        my $look_date = $p_result->{'end_date'};
-        my $look_period = delta_days_wrapper( $p_result->{'start_date'}, $look_date );
+        my $start_date = $p_result->{'start_date'};
+        my $end_date   = $p_result->{'end_date'};
+        my $period = delta_days_wrapper( $start_date, $end_date );
         
-        my ($flag, $value_delta) = daily_delta( \@daily, $look_date, $look_period );
-        (!$flag) or next;        
+        my $value_delta = daily_delta( \@daily, $start_date, $end_date );
+        
+        defined( $value_delta ) or next;
 
-        print "$opt_name,$p_result->{'start_date'} to $look_date,";
+        print "$opt_name,$start_date to $end_date,";
         printf "%.2f,", $p_result->{'delta_per'};
-        printf "%d,%.2f\n", $look_period, $value_delta;
+        printf "%d,%.2f\n", $period, $value_delta;
     }
 }
 
@@ -272,24 +274,24 @@ sub read_csv
 
 sub daily_delta
 {
-    my ($p_daily, $start, $period) = @_;
+    my ($p_daily, $start, $end) = @_;
     my ($start_v, $end_v);
     my $max = 0;
- 
+    
     foreach my $p_one (@$p_daily)
     {
         my $date = $p_one->{'date'};
         
-        (delta_days_wrapper( $start, $date ) >=0) or next;
+        (delta_days_wrapper( $start, $date ) > 0) or next;
         
-        (delta_days_wrapper( $start, $date ) <= $period) or last;
+        (delta_days_wrapper( $date, $end ) <= 85) or next;
+        
+        (delta_days_wrapper( $end, $date ) <= 85) or last;
         
         $start_v = $p_one->{'close'}  if( !defined($start_v) );
         
         $max = $p_one->{'close'} if( $p_one->{'close'} > $max );   
     }
 
-    defined($start_v) or return (-1,0);
-
-    return (0, ($max - $start_v) / $start_v);
+    return defined($start_v) ? (0, ($max - $start_v) / $start_v) : undef;
 }
