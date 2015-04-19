@@ -11,10 +11,11 @@ bin/hst
 
 alhena
 .DS_Store
+.swp
 *.o
 *.patch
 *.csv
-cookies_f.txt
+*.txt
 
 database/
 view/
