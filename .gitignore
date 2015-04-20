@@ -11,7 +11,7 @@ bin/hst
 
 alhena
 .DS_Store
-.swp
+*.swp
 *.o
 *.patch
 *.csv
