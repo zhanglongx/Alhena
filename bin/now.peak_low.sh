@@ -23,7 +23,7 @@ FILES=`find $data_dir -name "*.csv"`
 
 for csv_file in $FILES
 do
-    ./alhena -o fi-low -s now $csv_file > ${csv_file/$data_dir/$out_dir}
+    ./alhena -o fi-low -s now --fi-low-lookback 3 $csv_file > ${csv_file/$data_dir/$out_dir}
 done 
 
 for out_file in `find $out_dir -name "*.csv"` 
