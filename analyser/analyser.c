@@ -25,6 +25,7 @@
 extern alhena_sys_bank_t __g_sys_bank;
 
 static int load_data( alhena_t * );
+static int week( alhena_data_t *, const alhena_data_t *, int  );
 
 alhena_t *alhena_create()
 {
@@ -118,9 +119,10 @@ void alhena_delete( alhena_t *h )
 
 static int load_data( alhena_t *h )
 {
-    alhena_data_t *p_data = h->p_data;
+    alhena_data_t *p_scratch;
     alhena_sys_t *p_root = h->p_sys_root;
     char *psz_filename = sys_get_string( p_root, "input-filename" );
+    bool b_week = sys_get_bool( p_root, "week" );
     FILE *fp;
     uint32_t i_days = 0;
 
@@ -131,6 +133,15 @@ static int load_data( alhena_t *h )
         return -1;
     }
 
+    p_scratch = calloc( 1, sizeof( alhena_data_t ) );
+    if( !p_scratch )
+    {
+        fclose( fp );
+
+        msg_Err( "alloc scratch failed" );
+        return -1;
+    }
+
     while( !feof( fp ) )
     {
 #define GET_LINE_MAX    (512)
@@ -138,15 +149,15 @@ static int load_data( alhena_t *h )
 
         fgets( line, GET_LINE_MAX, fp );
         if ( 9 == sscanf( line, "%d-%d-%d,%f,%f,%f,%f,%lld,%lld", 
-                                &p_data->day[i_days].i_year,
-                                &p_data->day[i_days].i_month, 
-                                &p_data->day[i_days].i_day,
-                                &p_data->f_open[i_days],
-                                &p_data->f_high[i_days],
-                                &p_data->f_low[i_days],
-                                &p_data->f_close[i_days],
-                                &p_data->l_vol[i_days],
-                                &p_data->l_equity[i_days] ) )
+                                &p_scratch->day[i_days].i_year,
+                                &p_scratch->day[i_days].i_month, 
+                                &p_scratch->day[i_days].i_day,
+                                &p_scratch->f_open[i_days],
+                                &p_scratch->f_high[i_days],
+                                &p_scratch->f_low[i_days],
+                                &p_scratch->f_close[i_days],
+                                &p_scratch->l_vol[i_days],
+                                &p_scratch->l_equity[i_days] ) )
         {
             i_days++;
         }
@@ -169,7 +180,110 @@ static int load_data( alhena_t *h )
     msg_Dbg( "finish reading %d days data", i_days );
     h->i_days = i_days;
 
+    if( b_week )
+        h->i_days = week( h->p_data, p_scratch, i_days );
+    else
+        memcpy( h->p_data, p_scratch, sizeof( alhena_data_t ) );
+
+    free( p_scratch );
+
     fclose( fp );
     return 0;
+}
+
+static int week( alhena_data_t *p_week, const alhena_data_t *p_data, int i_days )
+{
+    float f_week_open = .0f, f_week_high = .0f;
+    float f_week_low  = 8000.0f, f_week_close = .0f;
+    uint64_t l_week_vol = 0, l_week_equity = 0;
+    int i_last_day = 1, i_last_mon = 1, i_last_year = 2001;
+    int i_w_day = 0, i_w_mon, i_w_year;
+    int i_week_dur = 0;
+    int i, k;
+    
+    for( i=0, k=0; i < i_days; i++ )
+    {
+        int i_day  = p_data->day[i].i_day;
+        int i_mon  = p_data->day[i].i_month;
+        int i_year = p_data->day[i].i_year;
+
+        int i_delta_day = delta_day( i_last_year, i_last_mon, i_last_day, i_year, i_mon, i_day );
+        
+        if( i_delta_day > 1 )
+        {
+            if( i )  /* not first one */
+            {
+                p_week->day[k].i_day   = i_w_day;
+                p_week->day[k].i_month = i_w_mon;
+                p_week->day[k].i_year  = i_w_year;
+
+                p_week->f_open[k]  = f_week_open;
+                p_week->f_high[k]  = f_week_high;
+                p_week->f_low[k]   = f_week_low;
+                p_week->f_close[k] = f_week_close;
+
+                p_week->l_vol[k]    = l_week_vol;
+                p_week->l_equity[k] = l_week_equity / i_week_dur;
+
+                k++;
+            }
+
+            f_week_open  = 
+            f_week_high  = 
+            f_week_close = .0f;
+
+            f_week_low   = 8000.0f;
+
+            l_week_vol    = 
+            l_week_equity = 0;
+
+            i_week_dur = 0;
+        }
+
+        if( !(f_week_open > .0f) )
+        {
+            f_week_open = p_data->f_open[i];
+
+            i_w_day  = i_day;
+            i_w_mon  = i_mon;
+            i_w_year = i_year;
+        }
+
+        if( p_data->f_low[i] < f_week_low )
+            f_week_low = p_data->f_low[i];
+
+        if( p_data->f_high[i] > f_week_high )
+            f_week_high = p_data->f_high[i];
+
+        f_week_close = p_data->f_close[i];
+
+        l_week_vol    += p_data->l_vol[i];
+        l_week_equity += p_data->l_equity[i];
+
+        i_week_dur++;
+
+        i_last_day  = i_day;
+        i_last_mon  = i_mon;
+        i_last_year = i_year;
+    }
+
+    if( f_week_open > .0f )
+    {
+        p_week->day[k].i_day   = i_w_day;
+        p_week->day[k].i_month = i_w_mon;
+        p_week->day[k].i_year  = i_w_year;
+
+        p_week->f_open[k]  = f_week_open;
+        p_week->f_high[k]  = f_week_high;
+        p_week->f_low[k]   = f_week_low;
+        p_week->f_close[k] = f_week_close;
+
+        p_week->l_vol[k]    = l_week_vol;
+        p_week->l_equity[k] = l_week_equity / i_week_dur;
+
+        k++;
+    }
+
+    return k;
 }
 

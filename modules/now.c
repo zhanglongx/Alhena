@@ -40,11 +40,6 @@ typedef struct _now_t
 
 }now_t;
 
-#define delta_day( y1, m1, d1, y2, m2, d2 ) \
-    (julian( (y2), (m2), (d2) ) - julian( (y1), (m1), (d1) ))
-
-static int julian( int , int , int  );
-
 void *alhena_module_now_init( variable_t *p_configs, alhena_data_t *p_data, 
                               int i_total, float *p_output )
 {
@@ -105,15 +100,4 @@ bool alhena_module_now_record_pre( void *h, alhena_data_t *p_data,
     
     return true;
 }
-
-static int julian( int year, int month, int day ) 
-{ 
-    int a = (14 - month) / 12; 
-    int y = year + 4800 - a; 
-    int m = month + 12 * a - 3; 
-    if (year > 1582 || (year == 1582 && month > 10) || (year == 1582 && month == 10 && day >= 15)) 
-        return day + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045; 
-    else 
-        return day + (153 * m + 2) / 5 + 365 * y + y / 4 - 32083; 
-} 
 

@@ -52,6 +52,7 @@ alhena_module_begin( root, ROOT_MODULE_NAME )
     create_config_string( "input-filename", "" )
     create_config_integer_with_range( "debug", \
                 _ALHENA_INF, _ALHENA_DBG, _ALHENA_OFF )
+    create_config_bool_set_value( "week", false )
     create_config_bool_set_value( "help", false )
 alhena_module_end()
 
