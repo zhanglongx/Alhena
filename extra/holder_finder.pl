@@ -99,7 +99,11 @@ sub main
         
         my $value_delta = daily_delta( \@daily, $start_date, $end_date );
         
-        defined( $value_delta ) or next;
+        if( !defined( $value_delta ) )
+        {
+            warn "$opt_name,$start_date to $end_date,Suspension?\n";
+            next;
+        }
 
         print "$opt_name,$start_date to $end_date,";
         printf "%.2f,", $p_result->{'delta_per'};
