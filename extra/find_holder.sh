@@ -13,6 +13,10 @@ EOF
 exit 1
 fi
 
+if uname -a | egrep -i darwin > /dev/null 2>&1; then
+    export LC_ALL=C
+fi
+
 holders=""
 start_date="2008-01-01"
 
