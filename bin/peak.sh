@@ -27,7 +27,7 @@ for opt do
     optarg="${opt#*=}"
     case "$opt" in
         --enable-hst)
-            $is_hst="yes"
+            is_hst="yes"
             ;;
         *)
             echo "Unknown option $opt, ignored"
