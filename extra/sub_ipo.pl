@@ -31,6 +31,8 @@ if( $opt_help )
     exit(0);
 }
 
+warn "update database in $opt_path first\n";
+
 (-e $opt_path && -e "$opt_path/holder") or die "input path error\n";
 
 my @stock_array;
