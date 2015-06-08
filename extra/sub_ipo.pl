@@ -1,5 +1,8 @@
 #! /usr/bin/perl -w
 
+use POSIX;
+use Date::Calc;
+
 use Getopt::Long;
 use File::Find;
 use File::Basename;
@@ -9,6 +12,7 @@ my $opt_total=120;
 my $opt_equity=80;      # unit 100M
 my $opt_percent=4.5;
 my $opt_recent=20;
+my $opt_no_sus=0;
 my $opt_path="../database";
 
 my $CONST_100M = 100000000;
@@ -17,6 +21,7 @@ GetOptions( "help"         => \$opt_help,
             "total=i"      => \$opt_total,
             "equity=i"     => \$opt_equity,
             "percent=f"    => \$opt_percent,
+            "no-sus"       => \$opt_no_sus,
             "database=s"   => \$opt_path
            );
 
@@ -27,11 +32,14 @@ if( $opt_help )
     print "    -t, --total                   total days ($opt_total)\n";
     print "    -e, --equity                  equity in 100M ($opt_equity)\n";
     print "    -p, --percent                 max ascending percent ($opt_percent)\n";
+    print "    -n, --no-sus                  no suspension ($opt_no_sus)\n";
     print "    -d, --database                database path [$opt_path]\n";
     exit(0);
 }
 
 warn "update database in $opt_path first\n";
+
+my $loc_date = strftime "%F", localtime $^T;
 
 (-e $opt_path && -e "$opt_path/holder") or die "input path error\n";
 
@@ -51,6 +59,8 @@ sub find_name
 
 sub do_work;
 sub delta_total;
+sub parse_date;
+sub delta_days_wrapper;
 sub main;
 
 find( \&find_name, "$opt_path" ); 
@@ -107,10 +117,12 @@ sub do_work
     
     close FH;
     
+    my $p_last = $database[@database - 1];
+    return %ret  if( $opt_no_sus && delta_days_wrapper( $p_last->{'date'}, $loc_date ) > 5 );
+    
     $ret{'total'} = scalar @database;
     return %ret  if( $ret{'total'} > $opt_total || $ret{'total'} == 0 );
     
-    my $p_last = $database[@database - 1];
     $ret{'equity'} = $p_last->{'equity'} * $p_last->{'close'};
     return %ret  if( $ret{'equity'} > $opt_equity * $CONST_100M );
     
@@ -141,4 +153,27 @@ sub delta_total
     }
     
     return ($end - $start) / $start;
+}
+
+sub parse_date
+{
+    my ($date) = @_;
+    
+    if ( $date =~ m/(\d+)-(\d+)-(\d+)/ )
+    {
+        return ($1, $2, $3);
+    }
+    else
+    {
+        return (2007, 1, 1);
+    }
+}
+
+sub delta_days_wrapper
+{
+    my ($date1, $date2) = @_;
+    my ($year1, $month1, $day1) = parse_date $date1;
+    my ($year2, $month2, $day2) = parse_date $date2;
+    
+    return Date::Calc::Delta_Days( $year1, $month1, $day1, $year2, $month2, $day2 );
 }
