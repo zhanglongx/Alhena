@@ -82,7 +82,7 @@ sub get_season
 {
     my ($month) = @_;
     
-    return int( $month / 4 ) + 1;
+    return int( $month / 3 ) + 1;
 }
 
 sub process;
