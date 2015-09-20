@@ -77,7 +77,7 @@ sub main
         
         if( defined( $delta ) )
         {
-            print "$stock,$delta\n";
+            printf "%d,%.2f\n", $stock, $delta;
         }
     }
 }
