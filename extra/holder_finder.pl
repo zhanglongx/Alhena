@@ -65,10 +65,11 @@ sub main
         or die "input date error\n";
         
     my %holders = read_txt;
-    my ($p_daily, $p_xdr_info);
+    my @xdr_info;    
+    my @daily;
     my @results = find_holder %holders;
     
-    read_old $opt_name, $opt_path, $p_xdr_info, $p_daily;
+    read_old $opt_name, $opt_path, \@xdr_info, \@daily;
     
     foreach my $p_result (@results)
     {
@@ -76,7 +77,7 @@ sub main
         my $end_date   = $p_result->{'end_date'};
         my $period = delta_days_wrapper( $start_date, $end_date );
         
-        my $value_delta = daily_delta( $p_daily, $start_date, $end_date );
+        my $value_delta = daily_delta( \@daily, $start_date, $end_date );
         
         if( !defined( $value_delta ) )
         {
