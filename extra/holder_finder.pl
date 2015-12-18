@@ -6,6 +6,8 @@ use Date::Calc;
 use File::Find;
 use File::Basename;
 
+use alhena_database;
+
 my $opt_help;
 my $opt_name;
 my @opt_possessor;
@@ -49,35 +51,10 @@ if( $opt_help || !defined( $opt_name ) || !@opt_possessor )
 
 (-e $opt_path && -e "$opt_path/holder") or die "input path error\n";
 
-sub parse_date
-{
-    my ($date) = @_;
-    
-    if ( $date =~ m/(\d+)-(\d+)-(\d+)/ )
-    {
-        return ($1, $2, $3);
-    }
-    else
-    {
-        warn "$date is not in date format\n";
-        return (2007, 1, 1);
-    }
-}
-
-sub delta_days_wrapper
-{
-    my ($date1, $date2) = @_;
-    my ($year1, $month1, $day1) = parse_date $date1;
-    my ($year2, $month2, $day2) = parse_date $date2;
-    
-    return Date::Calc::Delta_Days( $year1, $month1, $day1, $year2, $month2, $day2 );
-}
-
 sub main;
 sub read_txt;
 sub find_holder;
 sub sum_one_season;
-sub read_csv;
 sub daily_delta;
 
 main();
@@ -88,8 +65,10 @@ sub main
         or die "input date error\n";
         
     my %holders = read_txt;
-    my @daily   = read_csv;
+    my ($p_daily, $p_xdr_info);
     my @results = find_holder %holders;
+    
+    read_old $opt_name, $opt_path, $p_xdr_info, $p_daily;
     
     foreach my $p_result (@results)
     {
@@ -97,11 +76,11 @@ sub main
         my $end_date   = $p_result->{'end_date'};
         my $period = delta_days_wrapper( $start_date, $end_date );
         
-        my $value_delta = daily_delta( \@daily, $start_date, $end_date );
+        my $value_delta = daily_delta( $p_daily, $start_date, $end_date );
         
         if( !defined( $value_delta ) )
         {
-            warn "$opt_name,$start_date to $end_date,Suspension?\n";
+            print "$opt_name,$start_date to $end_date,Suspension?\n";
             next;
         }
 
@@ -237,43 +216,6 @@ sub sum_one_season
     }
     
     return ($sum_vol, $sum_per);
-}
-
-sub read_csv
-{
-    my $filename = "$opt_path/$opt_name.csv";
-    my $i_fails = 0;
-    my @daily;
-    
-    while( ! open FH, "$filename" )
-    {
-        if( $i_fails++ > 5 )
-        {
-            warn "can't open $filename for read: $!\n";
-            return @daily;
-        }
-    }    
-    
-    while(<FH>)
-    {
-        if( /(\d+-\d+-\d+),(.*),(.*),(.*),(.*),(.*),(.*)/ )
-        {
-            my %one_day;
-            
-            $one_day{'date'}   = $1;
-            $one_day{'open'}   = $2;
-            $one_day{'high'}   = $3;
-            $one_day{'low'}    = $4;
-            $one_day{'close'}  = $5;
-            $one_day{'vol'}    = $6;
-            $one_day{'equity'} = $7;
-            
-            push @daily, \%one_day;
-        }
-    }
-    
-    close FH;
-    return @daily;
 }
 
 sub daily_delta
