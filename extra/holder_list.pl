@@ -70,7 +70,10 @@ sub do_work
     
     read_holder $stock, \%holders;
     
-    print "$stock\n"   if( is_new( \%holders, $p_list ) );
+    if( is_new( \%holders, $p_list ) )
+    {
+        printf "%s\n", $stock;
+    }
 }
 
 sub read_list

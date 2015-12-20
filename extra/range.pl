@@ -7,14 +7,16 @@ use Getopt::Long;
 use File::Find;
 use File::Basename;
 
+use alhena_database;
+
 my $opt_help=0;
+my $opt_stock;
 my $opt_start;
 my $opt_end;
 my $opt_path="../database";
 
-my $CONST_100M = 100000000;
-
 GetOptions( "help"         => \$opt_help,
+            "name=s"       => \$opt_stock,
             "start=s"      => \$opt_start,
             "end=s"        => \$opt_end,
             "database=s"   => \$opt_path
@@ -24,6 +26,7 @@ if( $opt_help )
 {
     print "range [options]\n";
     print "    -h, --help                    print this message\n";
+    print "    -n, --name                    specifiy the subject\n";
     print "    -s, --start                   start date\n";
     print "    -e, --end                     end date\n";
     print "    -d, --database                database path [$opt_path]\n";
@@ -44,6 +47,8 @@ unless( defined( $opt_end ) )
 }
 
 ( -e $opt_path ) or die "input path error\n";
+( !defined($opt_stock) || (-e "$opt_path/$opt_stock.csv") )
+    or die "specified subject($opt_stock) error\n";
 
 my @stock_array;
 
@@ -61,11 +66,17 @@ sub find_name
 
 sub do_work;
 sub delta_total;
-sub parse_date;
-sub delta_days_wrapper;
+
 sub main;
 
-find( \&find_name, "$opt_path" ); 
+if( !defined( $opt_stock ) )
+{
+    find( \&find_name, "$opt_path" ); 
+}
+else 
+{
+    push @stock_array, $opt_stock;
+}
 
 main();
 
@@ -77,7 +88,7 @@ sub main
         
         if( defined( $delta ) )
         {
-            printf "%d,%.2f\n", $stock, $delta;
+            printf "%s,%.2f\n", $stock, $delta;
         }
     }
 }
@@ -85,42 +96,23 @@ sub main
 sub do_work
 {
     my ($stock) = @_;
-    my @database;
-    my $filename_txt = "$opt_path/$stock.csv";
+    my (@xdr_info, @database);
+    my @result;
     
-    open FH, "$filename_txt" or die "open $filename_txt failed: $!\n";
+    read_old( $stock, $opt_path, \@xdr_info, \@database );
     
-    while(<FH>)
+    foreach my $p_daily (@database)
     {
-        # xdr info
-        next  if( /^#\s+(\d+-\d+-\d+),([.0-9]+),([.0-9]+),([.0-9]+)/ );
-        
-        # real data
-        if( /(\d+-\d+-\d+),(.*),(.*),(.*),(.*),(.*),(.*)/ )
+        if( delta_days_wrapper( $opt_start, $p_daily->{'date'} ) > 0 &&
+            delta_days_wrapper( $p_daily->{'date'}, $opt_end ) > 0 )
         {
-            my %one_day;
-            
-            $one_day{'date'}   = $1;
-            $one_day{'open'}   = $2;
-            $one_day{'high'}   = $3;
-            $one_day{'low'}    = $4;
-            $one_day{'close'}  = $5;
-            $one_day{'vol'}    = $6;
-            $one_day{'equity'} = $7;
-
-            if( delta_days_wrapper( $opt_start, $one_day{'date'} ) > 0 &&
-                delta_days_wrapper( $one_day{'date'}, $opt_end ) > 0 )
-            {
-                push @database, \%one_day;
-            }
+            push @result, $p_daily;
         }
     }
     
-    close FH;
+    return undef  if( @result == 0 );
     
-    return undef  if( @database == 0 );
-    
-    return delta_total( \@database );
+    return delta_total( \@result );
 }
 
 sub delta_total
@@ -128,34 +120,8 @@ sub delta_total
     my ($p_database) = @_;
     my $p_first = $p_database->[0];
     my $start   = $p_first->{'close'};
-    my $p       = $p_database->[@$p_database - 1];
-    my $end     = $p->{'close'};
+    my $p_end   = $p_database->[@$p_database - 1];
+    my $end     = $p_end->{'close'};
     
-    $p = $p_database->[@$p_database/2];
-    my $mid = $p->{'close'};
-    
-    return ($mid > $start && $end > $mid) ? $end / $start : undef;
-}
-
-sub parse_date
-{
-    my ($date) = @_;
-    
-    if ( $date =~ m/(\d+)-(\d+)-(\d+)/ )
-    {
-        return ($1, $2, $3);
-    }
-    else
-    {
-        return (2007, 1, 1);
-    }
-}
-
-sub delta_days_wrapper
-{
-    my ($date1, $date2) = @_;
-    my ($year1, $month1, $day1) = parse_date $date1;
-    my ($year2, $month2, $day2) = parse_date $date2;
-    
-    return Date::Calc::Delta_Days( $year1, $month1, $day1, $year2, $month2, $day2 );
+    return ($end - $start) / $start;
 }
