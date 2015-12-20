@@ -16,7 +16,7 @@ my $opt_end;
 my $opt_path="../database";
 
 GetOptions( "help"         => \$opt_help,
-            "name=s"       => \$opt_stock,
+            'name=s@{1,}'  => \$opt_stock,
             "start=s"      => \$opt_start,
             "end=s"        => \$opt_end,
             "database=s"   => \$opt_path
@@ -47,8 +47,6 @@ unless( defined( $opt_end ) )
 }
 
 ( -e $opt_path ) or die "input path error\n";
-( !defined($opt_stock) || (-e "$opt_path/$opt_stock.csv") )
-    or die "specified subject($opt_stock) error\n";
 
 my @stock_array;
 
@@ -75,7 +73,28 @@ if( !defined( $opt_stock ) )
 }
 else 
 {
-    push @stock_array, $opt_stock;
+    foreach my $input (@$opt_stock)
+    {
+        if( -e $input )  # as filename
+        {
+            my $input_name = basename $input;
+            
+            # replace opt_path with input
+            my $opt_path = dirname $input;
+            
+            $input_name =~ s/\.csv//;
+            
+            push @stock_array, $input_name;
+        }
+        elsif( -e "$opt_path/$input.csv" )
+        {
+            push @stock_array, $input;
+        }
+        else 
+        {
+            warn "input stock name error\n";
+        }
+    }
 }
 
 main();
