@@ -10,6 +10,8 @@ $VERSION     = 1.00;
 @EXPORT_OK   = qw(parse_date delta_days_wrapper read_old write_new);
 %EXPORT_TAGS = ( DEFAULT => [qw(&read_old)],
                  Both    => [qw(&read_old)]);
+                 
+my $DATABASE_VERSION = 0.9;
 
 sub parse_date
 {
@@ -51,6 +53,17 @@ sub read_old
     
     while(<FH>)
     {
+        # version
+        if( /^#\s+version:\s+(.*)/ )
+        {
+            my $csv_version = $1;
+            if( $csv_version ne $DATABASE_VERSION )
+            {
+                warn 'version does not match: csv($csv_version) module($DATABASE_VERSION)\n';
+                return 1;
+            }
+        }
+        
         # xdr info
         if( /^#\s+(\d+-\d+-\d+),([.0-9]+),([.0-9]+),([.0-9]+)/ )
         {
@@ -102,6 +115,8 @@ sub write_new
             return 1;
         }
     }
+    
+    print WH "# version: $DATABASE_VERSION\n";
         
     # start with xdr info
     foreach my $p_xdr (@$p_xdr_info)
