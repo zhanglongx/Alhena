@@ -27,6 +27,8 @@ sub parse_date
     }
 }
 
+# The result is positive if the two dates are in chronological order, 
+# i.e., if date #1 comes chronologically BEFORE date #2
 sub delta_days_wrapper
 {
     my ($date1, $date2) = @_;
