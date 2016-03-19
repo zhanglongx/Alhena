@@ -18,6 +18,7 @@ mailtmp
 *.patch
 *.csv
 *.txt
+*.xml
 
 database/
 view/
