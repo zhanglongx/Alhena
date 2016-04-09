@@ -7,12 +7,14 @@ Build/*.user
 Build/Debug/
 Build/Release/
 Build/ipch/
+Build/.vs/
 bin/hst/
 extra/bak/
 
 alhena
 mailtmp
 .DS_Store
+*.opendb
 *.swp
 *.o
 *.patch
