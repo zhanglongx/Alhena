@@ -83,7 +83,7 @@ sub main
         
         foreach my $date (sort keys %result)
         {
-            printf "%s, %s\n", $date, $result{$date};
+            printf "%s, %s, %s\n", $stock, $date, $result{$date};
         }
     }
 }
