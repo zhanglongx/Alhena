@@ -19,8 +19,11 @@ mailtmp
 *.o
 *.patch
 *.csv
-*.txt
 *.xml
+
+Build/*.txt
+extra/*.txt
+
 
 database/
 view/

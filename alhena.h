@@ -26,19 +26,9 @@
 #   include <stdbool.h>
 #   include <limits.h>
 #elif defined(_MSC_VER)
-typedef unsigned char       uint8_t;
-typedef unsigned short      uint16_t;
-typedef unsigned int        uint32_t;
-typedef unsigned __int64    uint64_t;
-
-typedef char           int8_t;
-typedef short          int16_t;
-typedef int            int32_t;
-typedef __int64        int64_t;
-
-typedef uint8_t        bool;
-#define true           1
-#define false          0
+/* FIXME: vs 2015 check? */
+#   include <stdint.h>
+#   include <stdbool.h>
 #else
 #   error  "not supported platform"
 #endif

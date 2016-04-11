@@ -1,0 +1,26 @@
+
+This article teach you how to add a module for alhena
+
+1.	All modules are located in $(Alhena_root)/modules, you can review a module 
+for quick start. 
+
+2.	Add a module .c and .h in $(Alhena_root)/modules. Copy/rename an existing 
+one will make this much easier.
+
+3.	Add your .c and .h in Build (VS project) and Makefile, for adding your 
+module source files to the compiling system.
+
+4.	Modify $(Alhena_root)/analyser/modules.c below lines:
+
+    /* TODO: include modules here */
+    #include "modules/dummy.h"
+    #include "modules/fi.h"
+    /* your module header file */
+
+    int bank_collect()
+    {
+        // TODO/FIXME: register modules here, fix to use dynamic link
+        MODULE_REGISTER_HELPER( root,  &__g_sys_bank.sys[i_sys++] );
+        MODULE_REGISTER_HELPER( dummy, &__g_sys_bank.sys[i_sys++] );
+        /* your module insert here  */
+    }

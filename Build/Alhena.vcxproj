@@ -98,6 +98,7 @@
     <ClCompile Include="..\modules\peak.c" />
     <ClCompile Include="..\modules\peak_low.c" />
     <ClCompile Include="..\modules\pl_trade.c" />
+    <ClCompile Include="..\modules\vol.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

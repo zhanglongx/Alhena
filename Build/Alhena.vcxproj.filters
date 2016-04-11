@@ -81,5 +81,8 @@
     <ClCompile Include="..\modules\now.c">
       <Filter>modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\vol.c">
+      <Filter>modules</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

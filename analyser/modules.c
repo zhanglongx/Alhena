@@ -36,6 +36,8 @@
 #include "modules/peak.h"
 #include "modules/peak_low.h"
 
+#include "modules/vol.h"
+
 #define MODULE_REGISTER_HELPER( foo, sys ) \
     alhena_modules_##foo##_register( (sys) );
 
@@ -80,6 +82,8 @@ int bank_collect()
 
     MODULE_REGISTER_HELPER( peak,    &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( peaklow, &__g_sys_bank.sys[i_sys++] );
+
+    MODULE_REGISTER_HELPER( vol,     &__g_sys_bank.sys[i_sys++] );    
 
     assert( i_sys < ALHENA_MAX_SYS_NUMS );
     __g_sys_bank.i_sys = i_sys;

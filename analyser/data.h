@@ -86,6 +86,44 @@ ALHENA_INLINE float dev_v( float *f, int i_day, int i_length )
     return sqrtf( square );
 }
 
+ALHENA_INLINE uint64_t _l_sum_v( uint64_t *f, int i_day, int i_length )
+{
+    uint64_t sum = 0L;
+    int i = i_day - i_length;
+
+    if( i < 0 )
+        return 0L;
+
+    for( ; i<i_day; i++ )
+        sum += f[i];
+
+    return sum;
+}
+
+ALHENA_INLINE uint64_t l_avg_v( uint64_t *f, int i_day, int i_length )
+{
+    return _l_sum_v( f, i_day, i_length ) / i_length;
+}
+
+ALHENA_INLINE uint64_t l_dev_v( uint64_t *f, int i_day, int i_length )
+{
+    uint64_t avg = l_avg_v( f, i_day, i_length );
+    uint64_t square = 0L;
+    int i = i_day - i_length;
+
+    if( i < 0 )
+        return 0L;
+
+    for( ; i<i_day; i++ )
+        square += f[i] * f[i];
+
+    square = square / i_length - avg * avg;
+    if( square < 0.0 )
+        square *= -1L;
+
+    return (uint64_t)sqrt( (double)square );
+}
+
 #define PAST_MAX_N_FLOAT( max, data, day, n ) \
     MAX_N_FLOAT( (max), (data), (day) - (n), (day), (day) )
 
