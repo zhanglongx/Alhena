@@ -7,23 +7,61 @@ Usage: ./now.vol.sh
 Help:
   -h, --help               print this message
 
+  --dir=DIR                path to Alhena
+                           [~/Alhena]
+  --list=FILE              stock list
 EOF
 exit 1
 fi
 
-data_dir=../database
+alhena_dir=~/Alhena
 out_dir=./result
 
+for opt do
+    optarg="${opt#*=}"
+    case "$opt" in
+        --dir=*)
+            alhena_dir="$optarg"
+            ;;
+        --list=*)
+            list_file="$optarg"
+            ;;
+        *)
+            echo "Unknown option $opt, ignored"
+            ;;
+    esac
+done
+
+if [ ! -d $alhena_dir ]; then
+    echo "alhena_dir: $alhena_dir not exsit"
+    exit 1
+fi   
+
 # clean last result
-rm -rf result.csv
-find $out_dir -name "*.csv" -exec rm -f {} \;
+rm -f result.csv
 
-FILES=`find $data_dir -name "*.csv"`
-#FILES="$data_dir/300079.csv $data_dir/600000.csv $data_dir/600004.csv"
+if [ -d $out_dir ]; then
+    find $out_dir -name "*.csv" -exec rm -f {} \;
+else
+    mkdir -p $out_dir
+fi
 
-for csv_file in $FILES
+all_stock="300079"
+
+if [ x$list_file != x ] && [ -f $list_file ]; then
+    all_stock=`cat $list_file`
+fi
+
+for stock in $all_stock
 do
-    ./alhena -o vol -s peak $csv_file > ${csv_file/$data_dir/$out_dir}
+    file=$alhena_dir/database/$stock.csv
+    
+    if [ ! -f $file ]; then
+        echo "stock: $stock dosen't exist"
+        continue
+    fi
+    
+    $alhena_dir/bin/alhena -o vol --vol-compare-days 30 -s now --now-lookback 1 $file > $out_dir/$stock.csv
 done 
 
 for out_file in `find $out_dir -name "*.csv"` 
