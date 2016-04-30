@@ -33,6 +33,7 @@ GetOptions( "help"         => \$opt_help,
             "file=s"       => \$opt_config,
             "start=s"      => \$opt_start,
             "end=s"        => \$opt_end,
+            "path=s"       => \$opt_database,
            );
 
 if( $opt_help )
@@ -148,7 +149,7 @@ sub read_config
         }
     }
     
-    unless( @{$p_config->{codes}} > 0 )
+    unless( defined( $p_config->{codes} ) )
     {
         find( \&find_name, $opt_database ); 
         
