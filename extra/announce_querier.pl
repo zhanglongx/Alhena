@@ -221,7 +221,18 @@ sub query_daily
                     {
                         foreach my $keyword (@$p_keywords)
                         {
-                            if( index( $announce, $keyword ) >= 0 )
+                            my $b_found = 1;
+                            
+                            foreach my $word (split /,/, $keyword)
+                            {
+                                unless( index( $announce, $word ) >= 0 )
+                                {
+                                    $b_found = 0;
+                                    last;
+                                }
+                            }
+                            
+                            if( $b_found == 1 )
                             {
                                 $p_result->{$date} = $announce;
                             }
