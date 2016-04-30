@@ -25,6 +25,7 @@ my $opt_stock;
 my $opt_config;
 my $opt_start;
 my $opt_end;
+my $opt_database="../database";
 my $opt_compounding = 0;
 
 GetOptions( "help"         => \$opt_help,
@@ -42,6 +43,7 @@ if( $opt_help )
     print "    -f, --file                    specifiy the config file [null]\n";
     print "    -s, --start                   start date\n";
     print "    -e, --end                     end date\n";
+    print "    -p, --database                database path [$opt_database]\n";
     exit(0);
 }
 
@@ -60,6 +62,9 @@ unless( defined( $opt_end ) )
 {
     $opt_end = strftime "%F", localtime $^T;
 }
+
+( defined( $opt_database ) && -d $opt_database )
+    or die "database path: $opt_database doesn't exist\n";
 
 sub read_config;
 sub get_url;
@@ -145,9 +150,7 @@ sub read_config
     
     unless( @{$p_config->{codes}} > 0 )
     {
-        (-d "../database") or die "database path error\n";
-        
-        find( \&find_name, "../database" ); 
+        find( \&find_name, $opt_database ); 
         
         @{$p_config->{codes}} = @stock_all;
     }
