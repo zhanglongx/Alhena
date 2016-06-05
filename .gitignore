@@ -4,6 +4,7 @@ Build/*.opensdf
 Build/*.sdf
 Build/*.suo
 Build/*.user
+Build/*.db
 Build/Debug/
 Build/Release/
 Build/ipch/
