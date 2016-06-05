@@ -37,6 +37,7 @@ alhena_module_begin( vol, "vol" )
              alhena_module_vol_pos,
              NULL )
     create_config_integer_with_range( "vol-compare-days", 80, 1, 150 )
+    create_config_float_with_range( "vol-ratio", 4.0f, 1.0f, 40.0f )
 alhena_module_end()
 
 #ifdef __cplusplus

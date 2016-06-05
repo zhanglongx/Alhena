@@ -32,6 +32,8 @@ typedef struct _vol_t
     uint64_t  vol[MAX_DAYS];
 
     int    i_compare_days;
+
+    float  f_ratio;
     
 }vol_t;
 
@@ -58,6 +60,7 @@ void *alhena_module_vol_init( variable_t *p_config,
     }
 
     p_vol->i_compare_days = var_get_integer( p_config, "vol-compare-days" );
+    p_vol->f_ratio        = var_get_float( p_config, "vol-ratio" );
 
     return p_vol;
 }
@@ -79,7 +82,8 @@ bool alhena_module_vol_pos( void *h, alhena_data_t *p_data,
     if( i_start < 0 )
         return false;
 
-#define RATIO   (4.0f)
+//#define RATIO   (4.0f)
+#define RATIO     (p_vol->f_ratio)
 
     if( p_vol->vol[i_day] < l_avg_v( p_vol->vol, i_day, i_length ) 
                           + RATIO * l_dev_v( p_vol->vol, i_day, i_length ) )
