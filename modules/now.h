@@ -34,7 +34,7 @@ alhena_module_begin( now, "now" )
                      alhena_module_now_deinit )
     set_stats( alhena_module_now_record_pre,
                NULL )
-    create_config_integer_with_range( "now-lookback", 5, 1, 12 )
+    create_config_integer_with_range( "now-lookback", 5, 1, 365 )
 alhena_module_end()
 
 #ifdef __cplusplus
