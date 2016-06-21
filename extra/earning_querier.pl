@@ -62,7 +62,7 @@ sub main
         
         read_in_csv \%data_all, "http://money.finance.sina.com.cn/corp/go.php/vDOWN_CashFlow/displaytype/4/stockid/$stock/ctrl/all.phtml";
         
-        print_out \%data_all;
+        print_out \%data_all; 
     }
 }
 
@@ -134,7 +134,16 @@ sub read_in_csv
         Encode::from_to($line, "gb2312", "utf8");
         Encode::_utf8_on($line);
 
-        while( $line =~ /\b(\S+)\b/g )
+        if( $line =~ /(^\S+)/g )
+        {
+            $entry = $1;
+        }
+        else
+        {
+            next;
+        }
+
+        while( $line =~ /\s+([-0-9.]+)/g )
         {
             my $element = $1;
             
@@ -151,22 +160,16 @@ sub read_in_csv
             next  if( index( $element, "单位" ) >= 0 );
             
             next  if( index( $element, "元" ) >= 0 );
-            
-            if( !defined( $entry ) )
-            {
-                $entry = $element;
-                next;   # skip start code
-            }
-            
+
+            # hack for duplicated entry in cash flow table
+            next  if( defined $p_dataall->{$entry}->{$month[$ele_count]} );
+
             if( scalar @month > 0 && defined $month[$ele_count] )
             {
                 $p_dataall->{$entry}->{$month[$ele_count]} = $element;
                 $ele_count++;
             }
         }
-        
-        (scalar keys %{$p_dataall->{$entry}} == scalar @month) or
-            warn "parse $entry failed\n";
         
         $b_first_line = 0;
     }
@@ -176,7 +179,7 @@ sub print_out
 {
     my ($p_dataall) = @_;
     
-    foreach my $entry (sort keys %$p_dataall)
+    foreach my $entry (keys %$p_dataall)
     {
         printf "%s, ", $entry;
         
