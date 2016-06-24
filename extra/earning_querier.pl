@@ -18,10 +18,12 @@ use LWP::UserAgent;
 
 my $opt_help=0;
 my $opt_formula;
+my $opt_title=0;
 my $opt_database="../database";
 
 GetOptions( "help"         => \$opt_help,
             "formula=s"    => \$opt_formula,
+            "title"        => \$opt_title,
             "path=s"       => \$opt_database,
            );
 
@@ -30,13 +32,14 @@ if( $opt_help )
     print "$0 [options]\n";
     print "    -h, --help                    print this message\n";
     print "    -f, --formula <string>        specifiy the formula\n";
+    print "    -t, --title                   prefix with name\n";
     print "    -p, --path                    database path [$opt_database]\n";
     exit(0);
 }
 
 ( defined( $opt_database ) && -d $opt_database )
     or die "database path: $opt_database doesn't exist\n";
-    
+
 sub read_stocks;
 sub get_url;
 sub read_in_csv;
@@ -62,7 +65,7 @@ sub main
         
         read_in_csv \%data_all, "http://money.finance.sina.com.cn/corp/go.php/vDOWN_CashFlow/displaytype/4/stockid/$stock/ctrl/all.phtml";
         
-        print_out \%data_all; 
+        print_out \%data_all, $stock; 
     }
 }
 
@@ -137,6 +140,8 @@ sub read_in_csv
         if( $line =~ /(^\S+)/g )
         {
             $entry = $1;
+            
+            $entry = '营业收入'  if( index( $entry, '营业收入' ) >= 0 );
         }
         else
         {
@@ -157,10 +162,8 @@ sub read_in_csv
                 next;
             }
             
-            next  if( index( $element, "单位" ) >= 0 );
-            
             next  if( index( $element, "元" ) >= 0 );
-
+            
             # hack for duplicated entry in cash flow table
             next  if( defined $p_dataall->{$entry}->{$month[$ele_count]} );
 
@@ -177,17 +180,52 @@ sub read_in_csv
 
 sub print_out
 {
-    my ($p_dataall) = @_;
-    
-    foreach my $entry (keys %$p_dataall)
+    my ($p_dataall, $stock) = @_;
+    my $formula = $opt_formula;
+
+    if( defined( $formula ) )
     {
-        printf "%s, ", $entry;
-        
-        foreach my $month (reverse sort keys %{$p_dataall->{$entry}})
+        # FIXME: more strict check
+        while( $formula =~ m!([^ -+*/\(\)\d]+)!g )
         {
-            printf "%d, ", $p_dataall->{$entry}->{$month};
+            my $entry = $1;
+            
+            Encode::_utf8_on($entry);
+    
+            defined( $p_dataall->{$entry} ) or
+                die "$entry doesn't exist\n";
+        }
+        
+        Encode::_utf8_on($formula);
+        
+        print "$stock, "   if( $opt_title );
+        
+        print "$formula, ";
+
+        $formula =~ s/([^ -+*\/\(\)\d]+)/\$p_dataall->{$1}->{\$month}/g;
+        
+        foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
+        {
+            print eval( $formula );
+            print ", ";
         }
         
         print "\n";
+    }
+    else
+    {
+        print "$stock\n"  if( $opt_title );
+        
+        foreach my $entry (keys %$p_dataall)
+        {
+            printf "%s, ", $entry;
+            
+            foreach my $month (reverse sort keys %{$p_dataall->{$entry}})
+            {
+                printf "%d, ", $p_dataall->{$entry}->{$month};
+            }
+            
+            print "\n";
+        }
     }
 }
