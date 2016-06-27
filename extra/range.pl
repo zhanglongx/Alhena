@@ -146,7 +146,7 @@ sub delta_total
 {
     my ($p_database) = @_;
     my $p_first = $p_database->[0];
-    my $start   = $p_first->{'close'};
+    my $start   = abs $p_first->{'close'}; # hack for xdr
     my $p_end   = $p_database->[@$p_database - 1];
     my $end     = $p_end->{'close'};
     
@@ -157,7 +157,7 @@ sub delta_max
 {
     my ($p_database) = @_;
     my $p_first = $p_database->[0];
-    my $start   = $p_first->{'close'};
+    my $start   = abs $p_first->{'close'}; # hack for xdr
     my $max = 0.0;
     
     foreach my $p_entry (@$p_database)
