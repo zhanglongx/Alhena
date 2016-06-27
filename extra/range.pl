@@ -10,25 +10,25 @@ use File::Basename;
 use alhena_database;
 
 my $opt_help=0;
-my $opt_stock;
-my $opt_start;
+my $opt_start='2007-01-01';
 my $opt_end;
+my $opt_max=0;
 my $opt_path="../database";
 
 GetOptions( "help"         => \$opt_help,
-            'name=s@{1,}'  => \$opt_stock,
             "start=s"      => \$opt_start,
             "end=s"        => \$opt_end,
+            "max"          => \$opt_max,
             "database=s"   => \$opt_path
            );
 
 if( $opt_help )
 {
-    print "range [options]\n";
+    print "$0 [options] stocks\n";
     print "    -h, --help                    print this message\n";
-    print "    -n, --name                    specifiy the subject\n";
     print "    -s, --start                   start date\n";
     print "    -e, --end                     end date\n";
+    print "    -m, --max                     maximum mode\n";
     print "    -d, --database                database path [$opt_path]\n";
     exit(0);
 }
@@ -64,16 +64,17 @@ sub find_name
 
 sub do_work;
 sub delta_total;
+sub delta_max;
 
 sub main;
 
-if( !defined( $opt_stock ) )
+if( scalar( @ARGV ) == 0 )
 {
     find( \&find_name, "$opt_path" ); 
 }
 else 
 {
-    foreach my $input (@$opt_stock)
+    foreach my $input (@ARGV)
     {
         if( -e $input )  # as filename
         {
@@ -131,7 +132,14 @@ sub do_work
     
     return undef  if( @result == 0 );
     
-    return delta_total( \@result );
+    if( $opt_max == 0 )
+    {
+        return delta_total( \@result );
+    }
+    else
+    {
+        return delta_max( \@result );
+    }
 }
 
 sub delta_total
@@ -143,4 +151,22 @@ sub delta_total
     my $end     = $p_end->{'close'};
     
     return ($end - $start) / $start;
+}
+
+sub delta_max
+{
+    my ($p_database) = @_;
+    my $p_first = $p_database->[0];
+    my $start   = $p_first->{'close'};
+    my $max = 0.0;
+    
+    foreach my $p_entry (@$p_database)
+    {
+        if( $p_entry->{close} > $max )
+        {
+            $max = $p_entry->{close};
+        }
+    }
+    
+    return ($max - $start) / $start;
 }
