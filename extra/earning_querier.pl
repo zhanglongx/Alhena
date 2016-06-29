@@ -142,6 +142,8 @@ sub read_in_csv
             $entry = $1;
             
             $entry = '营业收入'  if( index( $entry, '营业收入' ) >= 0 );
+            
+            $entry = '净利润'    if( index( $entry, '净利润' ) >= 0 );
         }
         else
         {
