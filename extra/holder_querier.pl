@@ -21,7 +21,7 @@ GetOptions( "help"         => \$opt_help,
 
 if( $opt_help )
 {
-    print "holder_querier [options]\n";
+    print "$0 [options]\n";
     print "    -h, --help                    print this message\n";
     print "    -t, --threadnum <num>         thread num (1,2,3) [$opt_threadnum]\n";
     print "    -p, --path <path>             database path\n";
@@ -156,8 +156,6 @@ sub write_new
         my $vol     = $p_entry->{'vol'};
         my $percent = $p_entry->{'percent'};
 
-        Encode::from_to( $name, "gb2312", "utf8" ); 
-
         print WH "$date,";
         print WH "$name";
         print WH ",$vol,$percent\n";
@@ -198,11 +196,11 @@ sub get_url
 sub query_holder
 {
     my ($stock, $p_holder_info) = @_;
-    my $url_addr = "http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CirculateStockHolder/stockid/$stock/displaytype/400.phtml";
+    my $url_addr = "http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_StockHolder/stockid/$stock/displaytype/400.phtml";
     
     my $content = get_url $url_addr;
- 
-    while( $content =~ /align="left" class="tdr">(.*?)<td height="5px" colspan="10"/sg )
+
+    while( $content =~ /<td width="15(.*?)<td height="5px" colspan="10"/sg )
     {
         my $pieces = $1;
         my $date;
@@ -216,6 +214,8 @@ sub query_holder
             warn "date format error\n";
             next;
         }
+
+        Encode::from_to( $pieces, "gb2312", "utf8" ); 
         
         while( $pieces =~ m#<tr(.*?)</tr>#sg )
         {
@@ -229,18 +229,24 @@ sub query_holder
             
             while( $table =~ m#"center">(.*?)</div>#sg )
             {
+                my $value = $1;
+
+                $value =~ s#.*<a href.*>(.*)</a>.*#$1#;
+                $value =~ s#<font.*>.*</font>##;
+                $value =~ s#&nbsp;##;
+
                 # FIXME:
                 if( $cnt == 1 )
                 {
-                    $entry{'name'} = $1;
+                    $entry{'name'} = $value;
                 }
                 elsif ( $cnt == 2 )
                 {
-                    $entry{'vol'} = $1;
+                    $entry{'vol'} = $value;
                 }
                 elsif ( $cnt == 3 )
                 {
-                    $entry{'percent'} = $1;
+                    $entry{'percent'} = $value;
                 }
                 
                 $cnt++;
