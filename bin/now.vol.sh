@@ -39,6 +39,7 @@ fi
 
 # clean last result
 rm -f result.csv
+rm -f result.tmp.csv
 
 if [ -d $out_dir ]; then
     find $out_dir -name "*.csv" -exec rm -f {} \;
@@ -68,7 +69,7 @@ for out_file in `find $out_dir -name "*.csv"`
 do
     name=`basename $out_file`
     name=${name/.csv/}
-    cat $out_file | sed -n "s/^now,/$name,/gp" >> result.csv
+    cat $out_file | sed -n "s/^now,/$name,/gp" >> result.tmp.csv
 done
 
-# cat result.csv | sort -nrt '-' -k 3
+cat result.tmp.csv | sort -nrt '-' -k 3 >> result.csv

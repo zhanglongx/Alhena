@@ -18,10 +18,12 @@ use LWP::UserAgent;
 
 my $opt_help=0;
 my $opt_formula;
+my $opt_season=0;
 my $opt_title=0;
 my $opt_database="../database";
 
 GetOptions( "help"         => \$opt_help,
+            "season=i"     => \$opt_season,
             "formula=s"    => \$opt_formula,
             "title"        => \$opt_title,
             "path=s"       => \$opt_database,
@@ -31,11 +33,15 @@ if( $opt_help )
 {
     print "$0 [options]\n";
     print "    -h, --help                    print this message\n";
+    print "    -s, --season                  season mode [0], (0..4)\n";
     print "    -f, --formula <string>        specifiy the formula\n";
     print "    -t, --title                   prefix with name\n";
     print "    -p, --path                    database path [$opt_database]\n";
     exit(0);
 }
+
+( $opt_season >= 0 && $opt_season < 5 )
+    or die "season: $opt_season is not supported\n";
 
 ( defined( $opt_database ) && -d $opt_database )
     or die "database path: $opt_database doesn't exist\n";
@@ -44,6 +50,7 @@ sub read_stocks;
 sub get_url;
 sub read_in_csv;
 sub print_out;
+sub is_month;
 
 sub main;
 
@@ -208,8 +215,11 @@ sub print_out
         
         foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
         {
-            print eval( $formula );
-            print ", ";
+            if( is_month $month )
+            {
+                print eval( $formula );
+                print ", ";
+            }
         }
         
         print "\n";
@@ -224,10 +234,26 @@ sub print_out
             
             foreach my $month (reverse sort keys %{$p_dataall->{$entry}})
             {
-                printf "%d, ", $p_dataall->{$entry}->{$month};
+                if( is_month $month )
+                {
+                    printf "%d, ", $p_dataall->{$entry}->{$month};
+                }
             }
             
             print "\n";
         }
     }
+}
+
+sub is_month
+{
+    my ($month) = @_;
+    
+    my @tbl_month = (3, 6, 9, 12);
+    
+    $month =~ s/\d{4,4}(\d{2,2})\d{2,2}/$1/;
+    
+    return 1  if ( $opt_season == 0 );
+    
+    return ( $month == $tbl_month[$opt_season - 1] );
 }
