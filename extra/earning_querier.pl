@@ -17,6 +17,7 @@ use HTTP::Cookies;
 use LWP::UserAgent;
 
 my $opt_help=0;
+my $opt_human=0;
 my $opt_formula;
 my $opt_season=0;
 my $opt_title=0;
@@ -24,6 +25,7 @@ my $opt_database="../database";
 
 GetOptions( "help"         => \$opt_help,
             "season=i"     => \$opt_season,
+            "human"        => \$opt_human,
             "formula=s"    => \$opt_formula,
             "title"        => \$opt_title,
             "path=s"       => \$opt_database,
@@ -51,6 +53,7 @@ sub get_url;
 sub read_in_csv;
 sub print_out;
 sub is_month;
+sub format_number;
 
 sub main;
 
@@ -109,7 +112,7 @@ sub get_url
    
     my $ua = LWP::UserAgent->new;
     $ua->agent("MyApp/0.1 ");
-    $ua->timeout(120);
+    $ua->timeout(1200);
    
     my $req;
     my $res;
@@ -207,9 +210,14 @@ sub print_out
         
         Encode::_utf8_on($formula);
         
-        print "$stock, "   if( $opt_title );
-        
-        print "$formula, ";
+        if( $opt_title )
+        {
+            print "$stock";
+            print $opt_human ? " " : ", ";
+        }
+
+        print "$formula";
+        print $opt_human ? " " : ", ";
 
         $formula =~ s/([^ -+*\/\(\)\d]+)/\$p_dataall->{$1}->{\$month}/g;
         
@@ -217,8 +225,14 @@ sub print_out
         {
             if( is_month $month )
             {
-                print eval( $formula );
-                print ", ";
+                my $val = $opt_human ? format_number eval( $formula ) : 
+                                       eval $formula;
+                if( defined( $val ) )
+                {
+                    print $val;
+                    
+                    print $opt_human ? " " : ", ";
+                }
             }
         }
         
@@ -236,7 +250,14 @@ sub print_out
             {
                 if( is_month $month )
                 {
-                    printf "%d, ", $p_dataall->{$entry}->{$month};
+                    my $val = $opt_human ? format_number $p_dataall->{$entry}->{$month} : $p_dataall->{$entry}->{$month};
+ 
+                    if( defined( $val ) )
+                    {
+                        print $val;
+
+                        print $opt_human ? " " : ", ";
+                    }
                 }
             }
             
@@ -256,4 +277,25 @@ sub is_month
     return 1  if ( $opt_season == 0 );
     
     return ( $month == $tbl_month[$opt_season - 1] );
+}
+
+sub format_number
+{
+    my ($number) = @_;
+
+    return undef  if( !defined( $number ) );
+
+    return $number  if( $number =~ /\./ );
+
+    my $currnb = "";
+    my ($mantis, $decimals) = split(/\./, $number, 2);
+    $mantis =~ s/[^0-9]//g;
+    while ( length($mantis) > 3 ) {
+        $currnb = "'".(substr($mantis, length($mantis)-3, 3 )).$currnb;
+        $mantis = substr($mantis, 0, length($mantis)-3);
+    }
+    $currnb = $mantis.$currnb;
+    if ( $decimals ) { $currnb .= ".".$decimals; }
+    else { $currnb .= ".00"; }
+    return $currnb;
 }
