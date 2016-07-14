@@ -112,20 +112,21 @@ sub get_url
    
     my $ua = LWP::UserAgent->new;
     $ua->agent("MyApp/0.1 ");
-    $ua->timeout(1200);
+    $ua->timeout(120);
    
     my $req;
     my $res;
     
-    # Create a request
-    $req = HTTP::Request->new(GET => $url_addr);
-    $req->content_type('application/x-www-form-urlencoded');
-    $req->content('query=libwww-perl&mode=dist');
-   
-    # Pass request to the user agent and get a response back
-    $res = $ua->request($req);
-   
-    #return unless( $res->is_success );
+    do 
+    {
+        # Create a request
+        $req = HTTP::Request->new(GET => $url_addr);
+        $req->content_type('application/x-www-form-urlencoded');
+        $req->content('query=libwww-perl&mode=dist');
+       
+        # Pass request to the user agent and get a response back
+        $res = $ua->request($req);
+    }while( $res->content =~ /ERR_TYPE_MYSQL/ );
    
     return $res->content;
 }
