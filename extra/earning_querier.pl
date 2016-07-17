@@ -226,7 +226,7 @@ sub print_out
         foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
         {
             my $sub = $formula;
-            $sub =~ s/(.*?)!/sub_val($p_dataall, $1, $month)/eg;
+            $sub =~ s/(.*?)%/sub_val($p_dataall, $1, $month)/eg;
             
             if( is_month $month )
             {
