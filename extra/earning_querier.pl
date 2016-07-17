@@ -54,6 +54,7 @@ sub read_in_csv;
 sub print_out;
 sub is_month;
 sub format_number;
+sub sub_val;
 
 sub main;
 
@@ -199,9 +200,9 @@ sub print_out
     if( defined( $formula ) )
     {
         # FIXME: more strict check
-        while( $formula =~ m!([^ -+*/\(\)\d]+)!g )
+        while( $formula =~ m#[^ %-+*/\(\)\d]+#g )
         {
-            my $entry = $1;
+            my $entry = $&;
             
             Encode::_utf8_on($entry);
     
@@ -220,14 +221,17 @@ sub print_out
         print "$formula";
         print $opt_human ? " " : ", ";
 
-        $formula =~ s/([^ -+*\/\(\)\d]+)/\$p_dataall->{$1}->{\$month}/g;
+        $formula =~ s/([^ %-+*\/\(\)\d]+)/\$p_dataall->{$1}->{\$month}/g;
         
         foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
         {
+            my $sub = $formula;
+            $sub =~ s/(.*?)!/sub_val($p_dataall, $1, $month)/eg;
+            
             if( is_month $month )
             {
-                my $val = $opt_human ? format_number eval( $formula ) : 
-                                       eval $formula;
+                my $val = $opt_human ? format_number eval( $sub ) : 
+                                       eval $sub;
                 if( defined( $val ) )
                 {
                     print $val;
@@ -299,4 +303,28 @@ sub format_number
     if ( $decimals ) { $currnb .= ".".$decimals; }
     else { $currnb .= ".00"; }
     return $currnb;
+}
+
+sub sub_val
+{
+    my ($p_dataall, $sub, $m) = @_;
+    my $last_val;
+    
+    foreach my $month (sort keys %{$p_dataall->{应收账款}})
+    {
+        next unless( is_month $month );
+
+        if( $month == $m )
+        {
+            return 0  if( !defined( $last_val ) );
+
+            my $r = eval( $sub ); # tempz
+            return ( ( eval( $sub ) - $last_val ) / $last_val )  
+                if $last_val;
+        }
+
+        $last_val = eval $sub;
+    }
+
+    return 0;
 }
