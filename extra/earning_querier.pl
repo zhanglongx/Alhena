@@ -16,6 +16,8 @@ use File::Basename;
 use HTTP::Cookies;
 use LWP::UserAgent;
 
+use alhena_database;
+
 my $opt_help=0;
 my $opt_human=0;
 my $opt_formula;
@@ -55,6 +57,9 @@ sub print_out;
 sub is_month;
 sub format_number;
 sub sub_val;
+sub reverse_xdr;
+sub read_database;
+sub fill_pe;
 
 sub main;
 
@@ -76,6 +81,8 @@ sub main
         
         read_in_csv \%data_all, "http://money.finance.sina.com.cn/corp/go.php/vDOWN_CashFlow/displaytype/4/stockid/$stock/ctrl/all.phtml";
         
+        fill_pe \%data_all, $stock;
+
         print_out \%data_all, $stock; 
     }
 }
@@ -200,7 +207,7 @@ sub print_out
     if( defined( $formula ) )
     {
         # FIXME: more strict check
-        while( $formula =~ m#[^ %-+*/\(\)\d]+#g )
+        while( $formula =~ m#[^- %+*/\(\)\d]+#g )
         {
             my $entry = $&;
             
@@ -221,7 +228,7 @@ sub print_out
         print "$formula";
         print $opt_human ? " " : ", ";
 
-        $formula =~ s/([^ %-+*\/\(\)\d]+)/\$p_dataall->{$1}->{\$month}/g;
+        $formula =~ s/([^- %+*\/\(\)\d]+)/\$p_dataall->{$1}->{\$month}/g;
         
         foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
         {
@@ -327,4 +334,89 @@ sub sub_val
     }
 
     return 0;
+}
+
+sub reverse_xdr
+{
+    my ($value, $bouns, $gift, $donation) = @_;
+
+    # do xdr version   
+    # return ($value - $bouns / 10) / ( 1 + $gift / 10 + $donation / 10 );
+    return $value * ( 1 + $gift / 10 + $donation / 10 ) + $bouns / 10;
+}
+
+sub read_database
+{
+    my ($stock) = @_;
+    my @xdr_info;
+    my @daily;
+    
+    read_old( $stock, $opt_database, \@xdr_info, \@daily );
+    
+    # XXX: is the reverse version of data_querier.pl
+    foreach my $p_entry (@daily)
+    {
+        foreach my $p_one_xdr (@xdr_info)
+        {
+            my ($daily_date, $f_open, $f_high, $f_low, $f_close);
+            my ($date, $bouns, $gift, $donation);
+            
+            $daily_date = $p_entry->{'date'};
+            $f_open     = $p_entry->{'open'};
+            $f_high     = $p_entry->{'high'};
+            $f_low      = $p_entry->{'low'};
+            $f_close    = $p_entry->{'close'};
+            
+            $date     = $p_one_xdr->{'date'};
+            $bouns    = $p_one_xdr->{'bouns'};
+            $gift     = $p_one_xdr->{'gift'};
+            $donation = $p_one_xdr->{'donation'};
+            
+            next if ( delta_days_wrapper( $daily_date, $date ) < 0 );
+            
+            $p_entry->{'open'}  = reverse_xdr $f_open,  $bouns, $gift, $donation;  
+            $p_entry->{'high'}  = reverse_xdr $f_high,  $bouns, $gift, $donation;
+            $p_entry->{'low'}   = reverse_xdr $f_low,   $bouns, $gift, $donation;
+            $p_entry->{'close'} = reverse_xdr $f_close, $bouns, $gift, $donation;     
+        }
+    }
+    
+    return \@daily;
+}
+
+sub fill_pe
+{
+    my ($p_dataall, $stock) = @_;
+    my $p_daily = read_database $stock;
+
+    foreach my $profit_date (keys $p_dataall->{应收账款})
+    {
+        my $year;
+        my $mon;
+        my $day;
+
+        if( $profit_date =~ /(\d{4,4})(\d{2,2})(\d{2,2})/ )
+        {
+            ($year, $mon, $day) = ($1, $2, $3);
+        }
+        
+        foreach my $p_entry (@$p_daily)
+        {
+            my $data_date  = $p_entry->{'date'};
+            my $data_close = $p_entry->{'close'};
+            
+            if( delta_days_wrapper( $data_date, "$year-$mon-$day" ) >= 0 )
+            {
+                $p_dataall->{股价}->{$profit_date} = $data_close;
+            }
+        }
+    }
+
+    foreach my $profit_date (keys $p_dataall->{市盈率})
+    {
+        my $profit = $p_dataall->{基本每股收益}->{$profit_date};
+        my $close  = $p_dataall->{股价}->{$profit_date};
+
+        $p_dataall->{市盈率}->{$profit_date} = $close / $profit;
+    }
 }
