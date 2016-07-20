@@ -412,11 +412,11 @@ sub fill_pe
         }
     }
 
-    foreach my $profit_date (keys $p_dataall->{市盈率})
+    foreach my $profit_date (keys $p_dataall->{股价})
     {
         my $profit = $p_dataall->{基本每股收益}->{$profit_date};
         my $close  = $p_dataall->{股价}->{$profit_date};
 
-        $p_dataall->{市盈率}->{$profit_date} = $close / $profit;
+        $p_dataall->{市盈率}->{$profit_date} = defined( $profit ) && $profit ? $close / $profit : 0;
     }
 }
