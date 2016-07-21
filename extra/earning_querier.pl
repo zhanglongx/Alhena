@@ -147,6 +147,12 @@ sub read_in_csv
     my @month;
     my $b_first_line = 1;
     
+    my %tlb_trans = (
+            '营业收入' => '营业收入',
+            '净利润'   => '净利润',
+            '股本'     => '总股本',
+        );
+
     while( $content =~ /(.*)/mg )
     {
         my $line = $1;
@@ -160,9 +166,15 @@ sub read_in_csv
         {
             $entry = $1;
             
-            $entry = '营业收入'  if( index( $entry, '营业收入' ) >= 0 );
-            
-            $entry = '净利润'    if( index( $entry, '净利润' ) >= 0 );
+            # redefine entry
+            foreach my $trans (keys %tlb_trans)
+            {
+                if( index( $entry, $trans ) >= 0 )
+                {
+                    $entry = $tlb_trans{$trans};
+                    last;
+                }
+            }
         }
         else
         {
