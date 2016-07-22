@@ -240,7 +240,7 @@ sub print_out
         print "$formula";
         print $opt_human ? " " : ", ";
 
-        $formula =~ s/([^- %+*\/\(\)\d]+)/\$p_dataall->{$1}->{\$month}/g;
+        $formula =~ s/[^- %+*\/\(\)\d]+/\$p_dataall->{$&}->{\$month}/g;
         
         foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
         {
@@ -251,6 +251,11 @@ sub print_out
             {
                 my $val = $opt_human ? format_number eval( $sub ) : 
                                        eval $sub;
+
+                if( $opt_human )
+                {
+                    print "($month)";
+                }
                 if( defined( $val ) )
                 {
                     print $val;
