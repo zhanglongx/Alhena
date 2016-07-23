@@ -252,14 +252,14 @@ sub print_out
                 my $val = $opt_human ? format_number eval( $sub ) : 
                                        eval $sub;
 
-                if( $opt_human )
-                {
-                    print "($month)";
-                }
                 if( defined( $val ) )
                 {
                     print $val;
                     
+                    if( $opt_human )
+                    {
+                        print "($month)";
+                    }
                     print $opt_human ? " " : ", ";
                 }
             }
