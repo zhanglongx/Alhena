@@ -6,6 +6,7 @@ use warnings;
 use utf8;
 binmode STDOUT, ":utf8";
 
+use Term::ANSIColor;
 use Encode;
 
 use Getopt::Long;
@@ -19,13 +20,15 @@ use LWP::UserAgent;
 use alhena_database;
 
 my $opt_help=0;
+my $opt_color=40;
 my $opt_human=0;
 my $opt_formula;
-my $opt_season=0;
-my $opt_title=0;
+my $opt_season=4;
+my $opt_title=1;
 my $opt_database="../database";
 
 GetOptions( "help"         => \$opt_help,
+            "color=i"      => \$opt_color,
             "season=i"     => \$opt_season,
             "human"        => \$opt_human,
             "formula=s"    => \$opt_formula,
@@ -37,12 +40,15 @@ if( $opt_help )
 {
     print "$0 [options]\n";
     print "    -h, --help                    print this message\n";
+    print "    -c, --color                   print colorfully [$opt_color]\n";
     print "    -s, --season                  season mode [0], (0..4)\n";
     print "    -f, --formula <string>        specifiy the formula\n";
     print "    -t, --title                   prefix with name\n";
     print "    -p, --path                    database path [$opt_database]\n";
     exit(0);
 }
+
+$opt_color = $opt_color / 100;
 
 ( $opt_season >= 0 && $opt_season < 5 )
     or die "season: $opt_season is not supported\n";
@@ -254,12 +260,13 @@ sub print_out
 
                 if( defined( $val ) )
                 {
-                    print $val;
+                    my $b_color = $val > $opt_color  if( $formula =~ /%/ );
+
+                    print $b_color ? colored( $val, 'yellow' ) : $val;
                     
-                    if( $opt_human )
-                    {
-                        print "($month)";
-                    }
+                    $month =~ /^\d{4,4}/;
+                    print "($&)"  if( $opt_human );
+
                     print $opt_human ? " " : ", ";
                 }
             }
@@ -342,7 +349,6 @@ sub sub_val
         {
             return 0  if( !defined( $last_val ) );
 
-            my $r = eval( $sub ); # tempz
             return ( ( eval( $sub ) - $last_val ) / $last_val )  
                 if $last_val;
         }
