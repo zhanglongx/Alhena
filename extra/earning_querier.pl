@@ -20,7 +20,7 @@ use LWP::UserAgent;
 use alhena_database;
 
 my $opt_help=0;
-my $opt_color=40;
+my $opt_color=33;
 my $opt_human=0;
 my $opt_formula;
 my $opt_season=4;
@@ -263,7 +263,7 @@ sub print_out
 
                 if( defined( $val ) )
                 {
-                    my $b_color = $val > $opt_color  if( $formula =~ /%/ );
+                    my $b_color = abs( $val ) > $opt_color  if( $formula =~ /%/ );
 
                     print $b_color ? colored( $val, 'yellow' ) : $val;
                     
