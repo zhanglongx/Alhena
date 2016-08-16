@@ -59,6 +59,7 @@ $opt_title = !$opt_title;
 ( defined( $opt_database ) && -d $opt_database )
     or die "database path: $opt_database doesn't exist\n";
 
+sub read_config;
 sub read_stocks;
 sub get_url;
 sub read_in_csv;
@@ -78,6 +79,8 @@ main();
 
 sub main
 {
+    read_config;
+
     read_stocks;
     
     foreach my $stock (@stock_all)
@@ -94,6 +97,30 @@ sub main
 
         print_out \%data_all, $stock; 
     }
+}
+
+sub read_config
+{
+    my @config;
+
+    return  unless( defined( $opt_formula ) );
+
+    if( -e $opt_formula )  # as file
+    {
+        open FH, $opt_formula;
+        while( <FH> )
+        {
+            s/\n//g;
+            push @config, $_;
+        }
+        close FH;
+    }
+    else # as arguments
+    {
+        push @config, $opt_formula;
+    }
+
+    $opt_formula = \@config;
 }
 
 sub find_name
@@ -223,59 +250,61 @@ sub read_in_csv
 sub print_out
 {
     my ($p_dataall, $stock) = @_;
-    my $formula = $opt_formula;
 
-    if( defined( $formula ) )
+    if( defined( $opt_formula ) )
     {
-        # FIXME: more strict check
-        while( $formula =~ m#[^- %+*/\(\)\d]+#g )
+        foreach my $formula ( @$opt_formula )
         {
-            my $entry = $&;
-            
-            Encode::_utf8_on($entry);
-    
-            defined( $p_dataall->{$entry} ) or
-                die "$entry doesn't exist\n";
-        }
-        
-        Encode::_utf8_on($formula);
-        
-        if( $opt_title )
-        {
-            print "$stock";
-            print $opt_human ? " " : ", ";
-        }
-
-        print "$formula";
-        print $opt_human ? " " : ", ";
-
-        $formula =~ s/[^- %+*\/\(\)\d]+/\$p_dataall->{$&}->{\$month}/g;
-        
-        foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
-        {
-            my $sub = $formula;
-            $sub =~ s/(.*?)%/sub_val($p_dataall, $1, $month)/eg;
-            
-            if( is_month $month )
+            # FIXME: more strict check
+            while( $formula =~ m#[^- %+*/\(\)\d]+#g )
             {
-                my $val = $opt_human ? format_number eval( $sub ) : 
-                                       eval $sub;
+                my $entry = $&;
 
-                if( defined( $val ) )
+                Encode::_utf8_on($entry);
+
+                defined( $p_dataall->{$entry} ) or
+                    die "$entry doesn't exist\n";
+            }
+
+            Encode::_utf8_on($formula);
+
+            if( $opt_title )
+            {
+                print "$stock";
+                print $opt_human ? " " : ", ";
+            }
+
+            print "$formula";
+            print $opt_human ? " " : ", ";
+
+            $formula =~ s/[^- %+*\/\(\)\d]+/\$p_dataall->{$&}->{\$month}/g;
+
+            foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
+            {
+                my $sub = $formula;
+                $sub =~ s/(.*?)%/sub_val($p_dataall, $1, $month)/eg;
+
+                if( is_month $month )
                 {
-                    my $b_color = abs( $val ) > $opt_color  if( $formula =~ /%/ );
+                    my $val = $opt_human ? format_number eval( $sub ) : 
+                    eval $sub;
 
-                    print $b_color ? colored( $val, 'yellow' ) : $val;
-                    
-                    $month =~ /^\d{4,4}/;
-                    print "($&)"  if( $opt_human );
+                    if( defined( $val ) )
+                    {
+                        my $b_color = abs( $val ) > $opt_color  if( $formula =~ /%/ );
 
-                    print $opt_human ? " " : ", ";
+                        print $b_color ? colored( $val, 'yellow' ) : $val;
+
+                        $month =~ /^\d{4,4}/;
+                        print "($&)"  if( $opt_human );
+
+                        print $opt_human ? " " : ", ";
+                    }
                 }
             }
+
+            print "\n";
         }
-        
-        print "\n";
     }
     else
     {
