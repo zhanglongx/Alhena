@@ -465,6 +465,9 @@ sub fill_pe
                 $p_dataall->{股价}->{$profit_date} = $data_close;
             }
         }
+
+        $p_dataall->{股价}->{$profit_date} = 0.0
+            if ( !defined( $p_dataall->{股价}->{$profit_date} ) );
     }
 
     foreach my $profit_date (keys $p_dataall->{股价})
