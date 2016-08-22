@@ -2,7 +2,7 @@
 
 if test x"$1" = x"-h" -o x"$1" = x"--help" ; then
 cat <<EOF
-Usage: ./peak.sh [options]
+Usage: ./peak_low.sh [options]
 
 Help:
   -h, --help               print this message
@@ -14,7 +14,9 @@ EOF
 exit 1
 fi
 
-data_dir=../database
+alhena_dir=~/Alhena
+
+data_dir=$alhena_dir/database
 out_dir=./result
 
 # clean last result
@@ -40,7 +42,7 @@ FILES=`find $data_dir -name "*.csv"`
 
 for csv_file in $FILES
 do
-    ./alhena -o no-upseri+fi -s peak $csv_file > ${csv_file/$data_dir/$out_dir}
+    $alhena_dir/bin/alhena -o fi-low -s peak-low $csv_file > ${csv_file/$data_dir/$out_dir}
 done 
 
 for out_file in `find $out_dir -name "*.csv"` 
@@ -52,7 +54,7 @@ done
 
 if [ $is_hst = yes ]; then
     cat result.csv \
-        | awk -F ',' '{printf "../extra/data_printer.pl -n %s -s %s -b 20 -m ./hst/ \n", \
+        | awk -F ',' '{printf "$alhena_dir/extra/data_printer.pl -n %s -s %s -b 20 -m ./hst/ -p $out_dir\n", \
                                     $1, $2}' \
             | sh -x
 fi

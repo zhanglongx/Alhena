@@ -31,7 +31,7 @@ name=$1
 #echo $alhena_dir, $date, $name
 
 if ! [ -d $alhena_dir/database ]; then
-    echo "$alhena_dir/database doen't exist"
+    echo "$alhena_dir/database doesn't exist"
     exit 1
 fi
 

@@ -17,6 +17,8 @@ if uname -a | egrep -i darwin > /dev/null 2>&1; then
     export LC_ALL=C
 fi
 
+alhena_dir=~/Alhena
+
 holders=""
 start_date="2008-01-01"
 
@@ -48,14 +50,14 @@ fi
 # add -p to name(s)
 holders=`echo $holders | sed -e 's/ / -p /g' -e 's/^/-p /g'`
 
-FILES=`find ../database/holder -name '*.txt'`
+FILES=`find $alhena_dir/database/holder -name '*.txt'`
 
 rm -f result.txt
 
 for file in $FILES; do
     name=`basename $file`
     name=${name/.txt/}
-    ./holder_finder.pl -n $name $holders -s $start_date >> result.txt
+    $alhena_dir/extra/holder_finder.pl -n $name $holders -s $start_date >> result.txt
 done
 
 cat result.txt

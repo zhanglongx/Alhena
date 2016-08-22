@@ -43,7 +43,7 @@ if( $opt_help )
     print "    -c, --color                   print colorfully when > [$opt_color]\n";
     print "        --no-human                human readable\n";
     print "    -s, --season                  season mode [0], (0..4)\n";
-    print "    -f, --formula <string>        specifiy the formula\n";
+    print "    -f, --formula <string>        specifiy the formula or importting from file\n";
     print "        --no-title                prefix with name\n";
     print "    -p, --path                    database path [$opt_database]\n";
     exit(0);
