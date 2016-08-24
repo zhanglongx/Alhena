@@ -16,6 +16,7 @@ fi
 
 alhena_dir=~/Alhena
 out_dir=./result
+days=3
 
 for opt do
     optarg="${opt#*=}"
@@ -25,6 +26,9 @@ for opt do
             ;;
         --list=*)
             list_file="$optarg"
+            ;;
+        --days=*)
+            days="$optarg"
             ;;
         *)
             echo "Unknown option $opt, ignored"
@@ -53,6 +57,11 @@ if [ x$list_file != x ] && [ -f $list_file ]; then
     all_stock=`cat $list_file`
 fi
 
+if [ ! `echo $days | egrep "[0-9]+"` ]; then
+    echo "days error: $days"
+    exit 1
+fi
+
 for stock in $all_stock
 do
     file=$alhena_dir/database/$stock.csv
@@ -62,7 +71,7 @@ do
         continue
     fi
     
-    $alhena_dir/bin/alhena -o vol --vol-compare-days 30 -s now --now-lookback 1 $file > $out_dir/$stock.csv
+    $alhena_dir/bin/alhena -o vol --vol-compare-days 30 -s now --now-lookback $days $file > $out_dir/$stock.csv
 done 
 
 for out_file in `find $out_dir -name "*.csv"` 
