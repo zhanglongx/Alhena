@@ -452,7 +452,7 @@ sub read_database
             $date     = $p_one_xdr->{'date'};
             $bouns    = $p_one_xdr->{'bouns'};
             
-            # already xdr'ed on the that date
+            # already xdr'ed on that date
             next if ( delta_days_wrapper( $daily_date, $date ) <= 0 );
             
             # remove '-' for sorting below
