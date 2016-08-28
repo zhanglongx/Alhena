@@ -403,6 +403,8 @@ sub reverse_xdr
 sub read_database
 {
     my ($stock) = @_;
+    my %xdr_ratio_temp;
+    my @xdr_ratio;
     my @xdr_info;
     my @daily;
     
@@ -435,14 +437,48 @@ sub read_database
             $p_entry->{'close'} = reverse_xdr $f_close, $bouns, $gift, $donation;     
         }
     }
-    
-    return \@daily;
+
+    # FIXME: nested within last loop?
+    foreach my $p_entry (@daily)
+    {
+        foreach my $p_one_xdr (@xdr_info)
+        {
+            my ($daily_date, $f_close);
+            my ($date, $bouns);
+            
+            $daily_date = $p_entry->{'date'};
+            $f_close    = $p_entry->{'close'};
+            
+            $date     = $p_one_xdr->{'date'};
+            $bouns    = $p_one_xdr->{'bouns'};
+            
+            # already xdr'ed on the that date
+            next if ( delta_days_wrapper( $daily_date, $date ) <= 0 );
+            
+            # remove '-' for sorting below
+            $daily_date =~ s/-//g;
+            $xdr_ratio_temp{$date} = $f_close > 0 ? ($bouns / 10) / $f_close : 0;
+        }
+    }
+
+    foreach my $date (sort keys %xdr_ratio_temp)
+    {
+        $date =~ s/(\d{4,4})(\d{2,2})(\d{2,2})/$1-$2-$3/g;
+
+        my %entry = (
+                'date'  => $date,
+                'bouns' => $xdr_ratio_temp{$date},
+            );
+        
+        push @xdr_ratio, \%entry;
+    }
+    return (\@xdr_ratio, \@daily);
 }
 
 sub fill_pe
 {
     my ($p_dataall, $stock) = @_;
-    my $p_daily = read_database $stock;
+    my ($p_xdr_ratio, $p_daily) = read_database $stock;
 
     foreach my $profit_date (keys $p_dataall->{应收账款})
     {
@@ -468,6 +504,20 @@ sub fill_pe
 
         $p_dataall->{股价}->{$profit_date} = 0.0
             if ( !defined( $p_dataall->{股价}->{$profit_date} ) );
+
+        foreach my $p_entry (@$p_xdr_ratio)
+        {
+            my $data_date  = $p_entry->{'date'};
+            my $data_bouns = $p_entry->{'bouns'};
+            
+            if( delta_days_wrapper( $data_date, "$year-$mon-$day" ) >= 0 )
+            {
+                $p_dataall->{股息率}->{$profit_date} = $data_bouns;
+            }
+        }
+
+        $p_dataall->{股息率}->{$profit_date} = 0.0
+            if ( !defined( $p_dataall->{股息率}->{$profit_date} ) );
     }
 
     foreach my $profit_date (keys $p_dataall->{股价})
