@@ -253,8 +253,11 @@ sub print_out
 
     if( defined( $opt_formula ) )
     {
-        foreach my $formula ( @$opt_formula )
+        foreach my $__formula ( @$opt_formula )
         {
+            # make local copy of formula
+            my $formula = $__formula;
+
             # FIXME: more strict check
             while( $formula =~ m#[^- %+*/\(\)\d]+#g )
             {
@@ -353,7 +356,16 @@ sub format_number
 
     return undef  if( !defined( $number ) );
 
-    return $number  if( $number =~ /\./ );
+    if( $number =~ /\./ )
+    {
+        # keep atmost 3 digts
+        $number =~ s/(?<=\.\d\d\d)\d+//g;
+
+        # no float point for large number
+        return $number  unless( $number > 10000 );
+
+        $number =~ s/\..*//g;
+    }
 
     my $currnb = "";
     my ($mantis, $decimals) = split(/\./, $number, 2);
