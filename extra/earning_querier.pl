@@ -19,15 +19,26 @@ use LWP::UserAgent;
 
 use alhena_database;
 
+my %tlb_trans = (
+    '营业收入'     => '营业收入',
+    '净利润'       => '净利润',
+    '稀释每股收益' => '每股收益',
+    '市盈率'       => '股价*总股本/净利润',
+    'ROE'          => '净利润/(资产总计-负债合计)',
+    '股本'         => '总股本',
+);
+
 my $opt_help=0;
+my $opt_alias=0;
 my $opt_color=33;
 my $opt_human=0;
 my $opt_formula;
-my $opt_season=4;
+my $opt_season=0;
 my $opt_title=0;
 my $opt_database="../database";
 
 GetOptions( "help"         => \$opt_help,
+            "alias"        => \$opt_alias,
             "color=i"      => \$opt_color,
             "season=i"     => \$opt_season,
             "no-human"     => \$opt_human,
@@ -40,12 +51,23 @@ if( $opt_help )
 {
     print "$0 [options]\n";
     print "    -h, --help                    print this message\n";
+    print "    -a, --alias                   print out alias list\n";
     print "    -c, --color                   print colorfully when > [$opt_color]\n";
     print "        --no-human                human readable\n";
-    print "    -s, --season                  season mode [0], (0..4)\n";
+    print "    -s, --season                  season mode [$opt_season], (0..4)\n";
     print "    -f, --formula <string>        specifiy the formula or importting from file\n";
     print "        --no-title                prefix with name\n";
     print "    -p, --path                    database path [$opt_database]\n";
+    exit(0);
+}
+
+if( $opt_alias )
+{
+    foreach (keys %tlb_trans)
+    {
+        print "$_: $tlb_trans{$_}\n";
+    }
+
     exit(0);
 }
 
@@ -63,6 +85,7 @@ sub read_config;
 sub read_stocks;
 sub get_url;
 sub read_in_csv;
+sub substitute_alias;
 sub print_out;
 sub is_month;
 sub format_number;
@@ -146,6 +169,22 @@ sub read_stocks
     }
 }
 
+sub substitute_alias
+{
+    my ($entry) = @_;
+
+    # redefine entry
+    foreach my $trans (keys %tlb_trans)
+    {
+        if( index( $entry, $trans ) >= 0 )
+        {
+            return $tlb_trans{$trans};
+        }
+    }
+
+    return $entry;
+}
+
 sub get_url
 {
     my ($url_addr) = @_;
@@ -183,12 +222,6 @@ sub read_in_csv
     my @month;
     my $b_first_line = 1;
     
-    my %tlb_trans = (
-            '营业收入' => '营业收入',
-            '净利润'   => '净利润',
-            '股本'     => '总股本',
-        );
-
     while( $content =~ /(.*)/mg )
     {
         my $line = $1;
@@ -200,17 +233,7 @@ sub read_in_csv
 
         if( $line =~ /(^\S+)/g )
         {
-            $entry = $1;
-            
-            # redefine entry
-            foreach my $trans (keys %tlb_trans)
-            {
-                if( index( $entry, $trans ) >= 0 )
-                {
-                    $entry = $tlb_trans{$trans};
-                    last;
-                }
-            }
+            $entry = substitute_alias $1;
         }
         else
         {
@@ -256,7 +279,7 @@ sub print_out
         foreach my $__formula ( @$opt_formula )
         {
             # make local copy of formula
-            my $formula = $__formula;
+            my $formula = substitute_alias $__formula;
 
             # FIXME: more strict check
             while( $formula =~ m#[^- %+*/\(\)\d]+#g )
