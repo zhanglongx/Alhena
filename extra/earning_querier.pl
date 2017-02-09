@@ -32,14 +32,16 @@ my $opt_help=0;
 my $opt_alias=0;
 my $opt_color=33;
 my $opt_human=0;
-my $opt_formula;
+my $opt_reget=0;
 my $opt_season=0;
+my $opt_formula;
 my $opt_title=0;
 my $opt_database="../database";
 
 GetOptions( "help"         => \$opt_help,
             "alias"        => \$opt_alias,
             "color=i"      => \$opt_color,
+            "reget"        => \$opt_reget,
             "season=i"     => \$opt_season,
             "no-human"     => \$opt_human,
             "formula=s"    => \$opt_formula,
@@ -54,6 +56,7 @@ if( $opt_help )
     print "    -a, --alias                   print out alias list\n";
     print "    -c, --color                   print colorfully when > [$opt_color]\n";
     print "        --no-human                human readable\n";
+    print "    -r, --reget                   reget newest data\n";
     print "    -s, --season                  season mode [$opt_season], (0..4)\n";
     print "    -f, --formula <string>        specifiy the formula or importting from file\n";
     print "        --no-title                prefix with name\n";
@@ -83,6 +86,7 @@ $opt_title = !$opt_title;
 
 sub read_config;
 sub read_stocks;
+sub load_data;
 sub get_url;
 sub read_in_csv;
 sub substitute_alias;
@@ -109,13 +113,17 @@ sub main
     foreach my $stock (@stock_all)
     {
         my %data_all;
-        
-        read_in_csv \%data_all, "http://money.finance.sina.com.cn/corp/go.php/vDOWN_BalanceSheet/displaytype/4/stockid/$stock/ctrl/all.phtml";
-        
-        read_in_csv \%data_all, "http://money.finance.sina.com.cn/corp/go.php/vDOWN_ProfitStatement/displaytype/4/stockid/$stock/ctrl/all.phtml";
-        
-        read_in_csv \%data_all, "http://money.finance.sina.com.cn/corp/go.php/vDOWN_CashFlow/displaytype/4/stockid/$stock/ctrl/all.phtml";
-        
+        my $content;
+
+        $content = load_data "http://money.finance.sina.com.cn/corp/go.php/vDOWN_BalanceSheet/displaytype/4/stockid/$stock/ctrl/all.phtml", $stock, "balance";
+        read_in_csv \%data_all, $content;
+
+        $content = load_data "http://money.finance.sina.com.cn/corp/go.php/vDOWN_ProfitStatement/displaytype/4/stockid/$stock/ctrl/all.phtml", $stock, "profit";
+        read_in_csv \%data_all, $content;
+
+        $content = load_data "http://money.finance.sina.com.cn/corp/go.php/vDOWN_CashFlow/displaytype/4/stockid/$stock/ctrl/all.phtml", $stock, "cashflow";
+        read_in_csv \%data_all, $content;
+
         fill_pe \%data_all, $stock;
 
         print_out \%data_all, $stock; 
@@ -214,11 +222,39 @@ sub get_url
     return $res->content;
 }
 
+sub load_data
+{
+    my($url, $stock, $sheet) = @_;
+
+    my $filename = "$opt_database/earning/${stock}_$sheet.txt";
+    my $b_reget = $opt_reget | !( -e $filename );
+    my $content;
+
+    if( $b_reget )
+    {
+        $content = get_url $url;
+
+        open FH, ">$filename" or die "can't open $filename for writting\n";
+        print FH $content;
+        close FH;
+    }
+    else
+    {
+        open FH, "$filename" or die "can't open $filename for reading\n";
+        while(<FH>)
+        {
+            $content = $content.$_;
+        }
+        close FH;
+    }
+
+    return $content;
+}
+
 sub read_in_csv
 {
-    my ($p_dataall, $url) = @_;
+    my ($p_dataall, $content) = @_;
     
-    my $content = get_url $url;
     my @month;
     my $b_first_line = 1;
     
