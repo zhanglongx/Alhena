@@ -56,7 +56,7 @@ if( $opt_help )
     print "    -a, --alias                   print out alias list\n";
     print "    -c, --color                   print colorfully when > [$opt_color]\n";
     print "        --no-human                human readable\n";
-    print "    -r, --reget                   reget newest data\n";
+    print "    -r, --reget                   force to reget newest data\n";
     print "    -s, --season                  season mode [$opt_season], (0..4)\n";
     print "    -f, --formula <string>        specifiy the formula or importting from file\n";
     print "        --no-title                prefix with name\n";
@@ -234,13 +234,13 @@ sub load_data
     {
         $content = get_url $url;
 
-        open FH, ">$filename" or die "can't open $filename for writting\n";
+        open FH, ">$filename" or die "can't open $filename for writting: $!\n";
         print FH $content;
         close FH;
     }
     else
     {
-        open FH, "$filename" or die "can't open $filename for reading\n";
+        open FH, "$filename" or die "can't open $filename for reading: $!\n";
         while(<FH>)
         {
             $content = $content.$_;
