@@ -12,4 +12,4 @@ if ! [ -e $alhena_dir/extra/earning_querier.pl ]; then
     exit 1
 fi
 
-perl -I $alhena_dir/extra $alhena_dir/extra/earning_querier.pl -s 4 -p $alhena_dir/database -f $alhena_dir/extra/formula.txt $1
+perl -I $alhena_dir/extra $alhena_dir/extra/earning_querier.pl -s 4 -p $alhena_dir/database -f $alhena_dir/extra/formulas.txt $1
