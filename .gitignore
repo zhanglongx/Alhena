@@ -21,6 +21,7 @@ mailtmp
 *.patch
 *.csv
 *.xml
+*.xlsx
 
 Build/*.txt
 extra/*.txt
