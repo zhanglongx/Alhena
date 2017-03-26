@@ -123,8 +123,8 @@ sub do_work
     
     foreach my $p_daily (@database)
     {
-        if( delta_days_wrapper( $opt_start, $p_daily->{'date'} ) > 0 &&
-            delta_days_wrapper( $p_daily->{'date'}, $opt_end ) > 0 )
+        if( delta_days_wrapper( $opt_start, $p_daily->{'date'} ) >= 0 &&
+            delta_days_wrapper( $p_daily->{'date'}, $opt_end ) >= 0 )
         {
             push @result, $p_daily;
         }
@@ -159,12 +159,14 @@ sub delta_max
     my $p_first = $p_database->[0];
     my $start   = abs $p_first->{'close'}; # hack for xdr
     my $max = 0.0;
+
+    shift @$p_database;
     
     foreach my $p_entry (@$p_database)
     {
-        if( $p_entry->{close} > $max )
+        if( $p_entry->{high} > $max )
         {
-            $max = $p_entry->{close};
+            $max = $p_entry->{high};
         }
     }
     
