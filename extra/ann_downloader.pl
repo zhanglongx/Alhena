@@ -15,7 +15,7 @@ use JSON;
 my $MAX_PER_PAGE = 50;
 my $opt_help=0;
 my $opt_debug=0;
-#my $opt_path="~/OneDrive/文档/FI.Advanced/年报";
+#my $opt_path="/home/zhlx/OneDrive/FI.Advanced/年报";
 my $opt_path="/Users/zhanglongxiao/Workdir/announce";
 
 GetOptions( "help"         => \$opt_help,
@@ -142,7 +142,7 @@ sub get_one
         {
             my $title = $p_entry->{announcementTitle};
             my $name  = $p_entry->{secName};
-            my $url  = "$down_pre$p_entry->{adjunctUrl}";
+            my $url   = "$down_pre$p_entry->{adjunctUrl}";
 
             if( $opt_debug )
             {
@@ -163,5 +163,4 @@ sub get_one
         # FIXME: not true
         last  if( $data->{totalAnnouncement} < $MAX_PER_PAGE );
     }
-
 }
