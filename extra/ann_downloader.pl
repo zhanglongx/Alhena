@@ -113,8 +113,8 @@ sub mkdir_stock
     {
         unless( is_folder_empty $dir )
         {
-            warn "$dir is not empty, stop downloading ...\n";
-            return 0;
+            warn "$dir is not empty\n";
+            return 1;
         }
     }
 
@@ -157,10 +157,12 @@ sub get_one
             my $year = $&;
             my $file = "$opt_path/$stock/$stock.$name.$year.pdf";
 
+            # cowardly skip
+            next  if( -e "$opt_path/$stock/$stock.$name.$year.pdf" );
+
             getstore( $url, $file );
         }
 
-        # FIXME: not true
-        last  if( $data->{totalAnnouncement} < $MAX_PER_PAGE );
+        last  unless( @{$data->{announcements}} );
     }
 }
