@@ -38,7 +38,7 @@ GetOptions( "help"         => \$opt_help,
 
 if( $opt_help )
 {
-    print "range [options]\n";
+    print "$0 [options]\n";
     print "    -h, --help                    print this message\n";
     print "    -n, --name                    specifiy the subject\n";
     print "    -f, --file                    specifiy the config file [null]\n";
