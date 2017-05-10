@@ -555,7 +555,7 @@ sub fill_pe
     my ($p_dataall, $stock) = @_;
     my ($p_xdr_ratio, $p_daily) = read_database $stock;
 
-    foreach my $profit_date (keys $p_dataall->{应收账款})
+    foreach my $profit_date (keys %{$p_dataall->{应收账款}})
     {
         my $year;
         my $mon;
@@ -595,7 +595,7 @@ sub fill_pe
             if ( !defined( $p_dataall->{股息率}->{$profit_date} ) );
     }
 
-    foreach my $profit_date (keys $p_dataall->{股价})
+    foreach my $profit_date (keys %{$p_dataall->{股价}})
     {
         my $profit = $p_dataall->{基本每股收益}->{$profit_date};
         my $close  = $p_dataall->{股价}->{$profit_date};
