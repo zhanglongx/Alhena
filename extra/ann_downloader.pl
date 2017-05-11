@@ -161,6 +161,8 @@ sub get_one
             next  if( -e "$opt_path/$stock/$stock.$name.$year.pdf" );
 
             getstore( $url, $file );
+
+            print "$file saved\n";
         }
 
         last  unless( @{$data->{announcements}} );
