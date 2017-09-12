@@ -1,7 +1,5 @@
 #! /bin/sh
 
-set -x
-
 ALHENA_DIR=~/Programming/Alhena
 ALHENA_EXTRA_DIR=$ALHENA_DIR/extra
 
