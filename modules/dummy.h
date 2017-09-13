@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2015,2016 Alhena project
+ * Copyright (C) 2015-2017 Alhena project
  *
  * Authors: longxiao zhang <zhanglongx@gmail.com>
  *
