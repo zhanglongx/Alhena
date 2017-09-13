@@ -26,6 +26,7 @@ my %tlb_trans = (
     '净利润'       => '净利润',
     '稀释每股收益' => '每股收益',
     '市盈率'       => '股价*总股本/净利润',
+    '市值'         => '股价*总股本',
     'PE'           => '股价*总股本/净利润',
     'ROE'          => '净利润/(资产总计-负债合计)',
     '股本'         => '总股本',
@@ -329,7 +330,7 @@ sub print_out
                 Encode::_utf8_on($entry);
 
                 defined( $p_dataall->{$entry} ) or
-                    die "$entry doesn't exist\n";
+                    die "$stock $entry doesn't exist\n";
             }
 
             Encode::_utf8_on($formula);
@@ -352,8 +353,7 @@ sub print_out
 
                 if( is_month $month )
                 {
-                    my $val = $opt_human ? format_number eval( $sub ) : 
-                    eval $sub;
+                    my $val = $opt_human ? format_number eval( $sub ) : eval $sub;
 
                     if( defined( $val ) )
                     {
@@ -406,6 +406,11 @@ sub is_month
     
     my @tbl_month = (3, 6, 9, 12);
     
+    # FIXME: workaround for insufficience 
+    #        of data, or will lead to undef
+    #        warnings
+    return 0  if ( $month < 20070000 );
+
     $month =~ s/\d{4,4}(\d{2,2})\d{2,2}/$1/;
     
     return 1  if ( $opt_season == 0 );
