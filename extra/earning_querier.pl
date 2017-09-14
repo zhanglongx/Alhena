@@ -13,6 +13,7 @@ use Getopt::Long;
 
 use File::Find;
 use File::Basename;
+use File::Slurp qw( :edit read_file write_file );
 
 use HTTP::Cookies;
 use LWP::UserAgent;
@@ -34,6 +35,7 @@ my %tlb_trans = (
 );
 
 my $opt_help=0;
+my $opt_debug=0;
 my $opt_alias=0;
 my $opt_color=33;
 my $opt_human=0;
@@ -45,6 +47,7 @@ my $opt_database="../database";
 
 GetOptions( "help"         => \$opt_help,
             "alias"        => \$opt_alias,
+            "debug"        => \$opt_debug,
             "color=i"      => \$opt_color,
             "reget"        => \$opt_reget,
             "season=i"     => \$opt_season,
@@ -58,6 +61,7 @@ if( $opt_help )
 {
     print "$0 [options]\n";
     print "    -h, --help                    print this message\n";
+    print "    -d, --debug                   print debug info\n";
     print "    -a, --alias                   print out alias list\n";
     print "    -c, --color                   print colorfully when > [$opt_color]\n";
     print "        --no-human                human readable\n";
@@ -119,6 +123,8 @@ sub main
     {
         my %data_all;
         my $content;
+
+        warn "$stock\n"  if( $opt_debug );
 
         $content = load_data "http://money.finance.sina.com.cn/corp/go.php/vDOWN_BalanceSheet/displaytype/4/stockid/$stock/ctrl/all.phtml", $stock, "balance";
         read_in_csv \%data_all, $content;
@@ -213,7 +219,7 @@ sub get_url
     my $req;
     my $res;
     
-    do 
+    while(1) 
     {
         # Create a request
         $req = HTTP::Request->new(GET => $url_addr);
@@ -222,7 +228,16 @@ sub get_url
        
         # Pass request to the user agent and get a response back
         $res = $ua->request($req);
-    }while( $res->content =~ /ERR_TYPE_MYSQL/ );
+
+        last  unless( $res->content =~ /ERR_TYPE_MYSQL/ || $res->content =~ m!<html! );
+
+        last  unless( length( $res->content ) < 1024 );
+
+        warn "maybe detected by sina\n";
+        
+        # XXX: wait for more, due to the sniffing
+        sleep( 60 );
+    };
    
     return $res->content;
 }
@@ -232,25 +247,23 @@ sub load_data
     my($url, $stock, $sheet) = @_;
 
     my $filename = "$opt_database/earning/${stock}_$sheet.txt";
-    my $b_reget = $opt_reget | !( -e $filename );
     my $content;
 
-    if( $b_reget )
+    # XXX: re-get only if forced or too old or illed-data
+    if( $opt_reget || !(-e $filename) || (-M $filename > 30) || (-s $filename < 10 * 1024) )
     {
         $content = get_url $url;
 
         open FH, ">$filename" or die "can't open $filename for writting: $!\n";
         print FH $content;
         close FH;
+
+        # XXX: anti-sniffing
+        sleep(10);
     }
     else
     {
-        open FH, "$filename" or die "can't open $filename for reading: $!\n";
-        while(<FH>)
-        {
-            $content = $content.$_;
-        }
-        close FH;
+        $content = read_file( "$filename" );
     }
 
     return $content;
