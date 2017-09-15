@@ -39,7 +39,7 @@ update_raw()
 {
     echo "PE\nROE" > $_FORMULA_FILE
     perl -I $ALHENA_EXTRA_DIR $ALHENA_EXTRA_DIR/earning_querier.pl \
-        --no-human -r -s 4 -f $_FORMULA_FILE -p $ALHENA_DIR/database > $DEFAULT_CSV_NAME
+        --no-human -s 4 -f $_FORMULA_FILE -p $ALHENA_DIR/database > $DEFAULT_CSV_NAME
 
     CSV_FILE=$DEFAULT_CSV_NAME
 
