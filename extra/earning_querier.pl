@@ -20,6 +20,8 @@ use LWP::UserAgent;
 
 use alhena_database;
 
+my $MIN_CONTENT=3*1024;
+
 my %tlb_trans = (
     '营业总收入'   => '营业总收入',
     '营业总成本'   => '营业总成本',
@@ -88,7 +90,7 @@ $opt_human = !$opt_human;
 $opt_title = !$opt_title;
 
 ( $opt_season >= 0 && $opt_season < 5 )
-    or die "season: $opt_season is not supported\n";
+    or die "season: $opt_season error\n";
 
 ( defined( $opt_database ) && -d $opt_database )
     or die "database path: $opt_database doesn't exist\n";
@@ -179,7 +181,10 @@ sub find_name
 
 sub read_stocks
 {
-    @stock_all = @ARGV;
+    foreach (@ARGV)
+    {
+        push @stock_all, $_  if (-e "$opt_database/$_.csv");
+    }
     
     unless( scalar @stock_all > 0 )
     {
@@ -231,7 +236,7 @@ sub get_url
 
         last  unless( $res->content =~ /ERR_TYPE_MYSQL/ || $res->content =~ m!<html! );
 
-        last  unless( length( $res->content ) < 1024 );
+        last  unless( length( $res->content ) < $MIN_CONTENT );
 
         warn "maybe detected by sina\n";
         
@@ -249,8 +254,8 @@ sub load_data
     my $filename = "$opt_database/earning/${stock}_$sheet.txt";
     my $content;
 
-    # XXX: re-get only if forced or too old or illed-data
-    if( $opt_reget || !(-e $filename) || (-M $filename > 30) || (-s $filename < 10 * 1024) )
+    # XXX: re-get only if forced or too old or illegal data
+    if( $opt_reget || !(-e $filename) || (-M $filename > 6 * 30) || (-s $filename < $MIN_CONTENT) )
     {
         $content = get_url $url;
 
@@ -294,6 +299,24 @@ sub read_in_csv
             next;
         }
 
+        # null is for all
+        my $b_in_formula = scalar( @$opt_formula ) ? 0 : 1;
+
+        foreach my $__formula ( @$opt_formula )
+        {
+            my $formula = substitute_alias $__formula;
+
+            if( index( $formula, $entry ) >= 0 ||
+                index( $entry, '应收账款' ) >= 0 )
+            {
+                $b_in_formula = 1;
+
+                last;
+            }
+        }
+
+        next  unless( $b_first_line || $b_in_formula );
+
         while( $line =~ /\s+([-0-9.]+)/g )
         {
             my $element = $1;
@@ -310,7 +333,7 @@ sub read_in_csv
             
             next  if( index( $element, "元" ) >= 0 );
             
-            # hack for duplicated entry in cash flow table
+            # XXX: hack for duplicated entry in cash flow table
             next  if( defined $p_dataall->{$entry}->{$month[$ele_count]} );
 
             if( scalar @month > 0 && defined $month[$ele_count] )
