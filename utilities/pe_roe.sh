@@ -22,7 +22,7 @@ MIN_ROE=0.18
 usage()
 {
 	echo "Usage: $0 [.csv]"
-	echo "  if .csv was not given, it will try reget a new one"
+	echo "  if .csv was not given, it will try get a new one"
 
     exit 0
 }
