@@ -105,8 +105,8 @@ sub print_out;
 sub is_month;
 sub format_number;
 sub sub_val;
+sub one_xdr;
 sub reverse_xdr;
-sub read_database;
 sub fill_pe;
 
 sub main;
@@ -307,7 +307,7 @@ sub read_in_csv
             my $formula = substitute_alias $__formula;
 
             if( index( $formula, $entry ) >= 0 ||
-                index( $entry, '应收账款' ) >= 0 )
+                index( $entry, '报表日期' ) >= 0 )
             {
                 $b_in_formula = 1;
 
@@ -327,8 +327,6 @@ sub read_in_csv
                 {
                     push @month, $element;
                 }
-                
-                next;
             }
             
             next  if( index( $element, "元" ) >= 0 );
@@ -382,7 +380,7 @@ sub print_out
 
             $formula =~ s/[^- %+*\/\(\)\d]+/\$p_dataall->{$&}->{\$month}/g;
 
-            foreach my $month (reverse sort keys %{$p_dataall->{应收账款}})
+            foreach my $month (reverse sort keys %{$p_dataall->{报表日期}})
             {
                 my $sub = $formula;
                 $sub =~ s/(.*?)%/sub_val($p_dataall, $1, $month)/eg;
@@ -489,7 +487,7 @@ sub sub_val
     my ($p_dataall, $sub, $m) = @_;
     my $last_val;
     
-    foreach my $month (sort keys %{$p_dataall->{应收账款}})
+    foreach my $month (sort keys %{$p_dataall->{报表日期}})
     {
         next unless( is_month $month );
 
@@ -507,7 +505,7 @@ sub sub_val
     return 0;
 }
 
-sub reverse_xdr
+sub one_xdr
 {
     my ($value, $bouns, $gift, $donation) = @_;
 
@@ -516,131 +514,112 @@ sub reverse_xdr
     return $value * ( 1 + $gift / 10 + $donation / 10 ) + $bouns / 10;
 }
 
-sub read_database
+sub reverse_xdr
 {
-    my ($stock) = @_;
-    my %xdr_ratio_temp;
-    my @xdr_ratio;
-    my @xdr_info;
-    my @daily;
-    
-    read_old( $stock, $opt_database, \@xdr_info, \@daily );
-    
+    my ($p_entry, $p_xdr_ratio) = @_;
+
     # XXX: is the reverse version of data_querier.pl
-    foreach my $p_entry (@daily)
+    foreach my $p_one_xdr (@$p_xdr_ratio)
     {
-        foreach my $p_one_xdr (@xdr_info)
-        {
-            my ($daily_date, $f_open, $f_high, $f_low, $f_close);
-            my ($date, $bouns, $gift, $donation);
-            
-            $daily_date = $p_entry->{'date'};
-            $f_open     = $p_entry->{'open'};
-            $f_high     = $p_entry->{'high'};
-            $f_low      = $p_entry->{'low'};
-            $f_close    = $p_entry->{'close'};
-            
-            $date     = $p_one_xdr->{'date'};
-            $bouns    = $p_one_xdr->{'bouns'};
-            $gift     = $p_one_xdr->{'gift'};
-            $donation = $p_one_xdr->{'donation'};
-            
-            next if ( delta_days_wrapper( $daily_date, $date ) < 0 );
-            
-            $p_entry->{'open'}  = reverse_xdr $f_open,  $bouns, $gift, $donation;  
-            $p_entry->{'high'}  = reverse_xdr $f_high,  $bouns, $gift, $donation;
-            $p_entry->{'low'}   = reverse_xdr $f_low,   $bouns, $gift, $donation;
-            $p_entry->{'close'} = reverse_xdr $f_close, $bouns, $gift, $donation;     
-        }
-    }
-
-    # FIXME: nested within last loop?
-    foreach my $p_entry (@daily)
-    {
-        foreach my $p_one_xdr (@xdr_info)
-        {
-            my ($daily_date, $f_close);
-            my ($date, $bouns);
-            
-            $daily_date = $p_entry->{'date'};
-            $f_close    = $p_entry->{'close'};
-            
-            $date     = $p_one_xdr->{'date'};
-            $bouns    = $p_one_xdr->{'bouns'};
-            
-            # already xdr'ed on that date
-            next if ( delta_days_wrapper( $daily_date, $date ) <= 0 );
-            
-            # remove '-' for sorting below
-            $daily_date =~ s/-//g;
-            $xdr_ratio_temp{$date} = $f_close > 0 ? ($bouns / 10) / $f_close : 0;
-        }
-    }
-
-    foreach my $date (sort keys %xdr_ratio_temp)
-    {
-        $date =~ s/(\d{4,4})(\d{2,2})(\d{2,2})/$1-$2-$3/g;
-
-        my %entry = (
-                'date'  => $date,
-                'bouns' => $xdr_ratio_temp{$date},
-            );
+        my ($daily_date, $f_open, $f_high, $f_low, $f_close);
+        my ($date, $bouns, $gift, $donation);
         
-        push @xdr_ratio, \%entry;
+        $daily_date = $p_entry->{'date'};
+        $f_open     = $p_entry->{'open'};
+        $f_high     = $p_entry->{'high'};
+        $f_low      = $p_entry->{'low'};
+        $f_close    = $p_entry->{'close'};
+        
+        $date     = $p_one_xdr->{'date'};
+        $bouns    = $p_one_xdr->{'bouns'};
+        $gift     = $p_one_xdr->{'gift'};
+        $donation = $p_one_xdr->{'donation'};
+        
+        next if ( delta_days_wrapper( $daily_date, $date ) < 0 );
+        
+        # not really necessary
+        $p_entry->{'open'}  = one_xdr $f_open,  $bouns, $gift, $donation;  
+        $p_entry->{'high'}  = one_xdr $f_high,  $bouns, $gift, $donation;
+        $p_entry->{'low'}   = one_xdr $f_low,   $bouns, $gift, $donation;
+
+        $p_entry->{'close'} = one_xdr $f_close, $bouns, $gift, $donation;     
     }
-    return (\@xdr_ratio, \@daily);
 }
 
 sub fill_pe
 {
     my ($p_dataall, $stock) = @_;
-    my ($p_xdr_ratio, $p_daily) = read_database $stock;
+    my (@xdr_info, @daily);
+    my ($p_xdr_ratio, $p_daily) = (\@xdr_info, \@daily);
 
-    foreach my $profit_date (keys %{$p_dataall->{应收账款}})
+    read_old $stock, $opt_database, $p_xdr_ratio, $p_daily;
+
+    foreach my $profit_date (sort keys %{$p_dataall->{报表日期}})
     {
         my $year;
         my $mon;
         my $day;
 
+        next  unless( is_month( $profit_date ) );
+
         if( $profit_date =~ /(\d{4,4})(\d{2,2})(\d{2,2})/ )
         {
             ($year, $mon, $day) = ($1, $2, $3);
         }
+
+        my $p_entry;
+
+        # find last queryable close
+        while( ($_=shift @$p_daily) )
+        {
+            my $data_date = $_->{'date'};
+            
+            unless( delta_days_wrapper( $data_date, "$year-$mon-$day" ) >= 0 )
+            {
+                unshift @$p_daily, $_;
+                last;
+            }
+
+            $p_entry = $_;
+        }
         
-        foreach my $p_entry (@$p_daily)
+        unless( defined( $p_entry ) )
         {
-            my $data_date  = $p_entry->{'date'};
-            my $data_close = $p_entry->{'close'};
+            $p_dataall->{股价}->{$profit_date} = 0.0;
+        }
+        else
+        {
+            # unshift for next profit date
+            unshift @$p_daily, $p_entry;
+
+            reverse_xdr $p_entry, $p_xdr_ratio;
+
+            $p_dataall->{股价}->{$profit_date} = $p_entry->{close};
+        }
+
+        # XXX: find first xdr bouns, here the bouns is binded to the last 
+        #      profit date
+        foreach my $p_one_xdr (@$p_xdr_ratio)
+        {
+            my $data_date  = $p_one_xdr->{'date'};
+            my $data_bouns = $p_one_xdr->{'bouns'};
             
-            if( delta_days_wrapper( $data_date, "$year-$mon-$day" ) >= 0 )
+            if( delta_days_wrapper( "$year-$mon-$day", $data_date ) >= 0 )
             {
-                $p_dataall->{股价}->{$profit_date} = $data_close;
+                # every 10 share
+                $p_dataall->{股息率}->{$profit_date} = $data_bouns / 10;
+                last;
             }
         }
 
-        $p_dataall->{股价}->{$profit_date} = 0.0
-            if ( !defined( $p_dataall->{股价}->{$profit_date} ) );
-
-        foreach my $p_entry (@$p_xdr_ratio)
+        if( defined( $p_dataall->{股息率}->{$profit_date} ) && 
+            $p_dataall->{股价}->{$profit_date} )
         {
-            my $data_date  = $p_entry->{'date'};
-            my $data_bouns = $p_entry->{'bouns'};
-            
-            if( delta_days_wrapper( $data_date, "$year-$mon-$day" ) >= 0 )
-            {
-                $p_dataall->{股息率}->{$profit_date} = $data_bouns;
-            }
+            $p_dataall->{股息率}->{$profit_date} /= $p_dataall->{股价}->{$profit_date};
         }
-
-        $p_dataall->{股息率}->{$profit_date} = 0.0
-            if ( !defined( $p_dataall->{股息率}->{$profit_date} ) );
-    }
-
-    foreach my $profit_date (keys %{$p_dataall->{股价}})
-    {
-        my $profit = $p_dataall->{基本每股收益}->{$profit_date};
-        my $close  = $p_dataall->{股价}->{$profit_date};
-
-        $p_dataall->{市盈率}->{$profit_date} = defined( $profit ) && $profit ? $close / $profit : 0;
+        else
+        {
+            $p_dataall->{股息率}->{$profit_date} = 0.0
+        }
     }
 }
