@@ -1,6 +1,6 @@
 #! /bin/sh
 
-ALHENA_DIR=~/Programming/Alhena
+ALHENA_DIR=~/Alhena
 ALHENA_EXTRA_DIR=$ALHENA_DIR/extra
 
 DEFAULT_CSV_NAME=pe_roe_raw.csv
