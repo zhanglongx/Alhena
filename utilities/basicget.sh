@@ -1,47 +1,63 @@
 #! /bin/bash
 
-if test x"$1" = x"-h" -o x"$1" = x"--help" ; then
-cat <<EOF
-Usage: ./$0 [options]
+DEFAULT_TXT=_basic_formula.txt
 
-Help:
-  -h, --help               print this message
-Standard options:  
-  --no-human               not human readable
-EOF
-exit 1
-fi
+#
+# Command line handling
+#
+usage()
+{
+	echo "Usage: $0 [options] NAME"
+	echo "  -f formula    formula"
 
-alhena_dir=~/Alhena
+    exit 0
+}
 
-human=true
-stock=300079
-
-for opt do
-    optarg="${opt#*=}"
-    case "$opt" in
-        --no-human)
-            human=false
-            ;;
-        *)
-            # FIXME:
-            stock=$opt
-            ;;            
+while getopts 'f:h' OPT; do
+    case $OPT in
+        f)
+            formula="$OPTARG";;
+        h)
+            usage;;
+        ?)
+            usage;;
     esac
 done
 
-if ! [ -e $alhena_dir/database/$stock.csv ] ; then
-    echo "check argument"
+failed_exit()
+{
+    echo "$0: $1"
     exit 1
-fi
+}
 
-if ! [ -e $alhena_dir/extra/earning_querier.pl ]; then
-    echo "check directory"
-    exit 1
-fi
+cat > $DEFAULT_TXT << EOF
+PE
+ROE
+净利润 
+净利润%
+EOF
 
-if test $human = true; then
-    perl -I $alhena_dir/extra $alhena_dir/extra/earning_querier.pl -s 4 -p $alhena_dir/database -f $alhena_dir/extra/formulas.txt $stock
-else
-    perl -I $alhena_dir/extra $alhena_dir/extra/earning_querier.pl --no-human -s 4 -p $alhena_dir/database -f $alhena_dir/extra/formulas.txt $stock
-fi
+alhena_dir=~/Alhena
+
+test -e $alhena_dir/extra/earning_querier.pl || failed_exit "can't find earning_querier.pl"
+
+querier_one()
+{
+    f=$1
+    name=$2
+
+    test -e $alhena_dir/database/$name.csv || failed_exit "$name not exist"
+
+    perl -I $alhena_dir/extra $alhena_dir/extra/earning_querier.pl -s 4 -p $alhena_dir/database -f $f $name
+}
+
+shift $((OPTIND-1))
+for name in $@; do
+    if test x$formula = x; then
+        querier_one $DEFAULT_TXT $name
+    else
+        querier_one $formula $name
+    fi
+done
+
+rm -f $DEFAULT_TXT
