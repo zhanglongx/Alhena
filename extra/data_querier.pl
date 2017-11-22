@@ -1,4 +1,5 @@
 #! /usr/bin/perl -w
+use v5.10;
 use strict;
 
 use Getopt::Long;
@@ -10,6 +11,8 @@ use LWP::UserAgent;
 use threads;
 
 use alhena_database;
+
+my $MIN_CONTENT=1024;
 
 my $opt_help;
 my $opt_threadnum = 3;
@@ -165,15 +168,23 @@ sub get_url
     my $req;
     my $res;
     
-    # Create a request
-    $req = HTTP::Request->new(GET => $url_addr);
-    $req->content_type('application/x-www-form-urlencoded');
-    $req->content('query=libwww-perl&mode=dist');
-   
-    # Pass request to the user agent and get a response back
-    $res = $ua->request($req);
-   
-    #return unless( $res->is_success );
+    while(1) 
+    {
+        # Create a request
+        $req = HTTP::Request->new(GET => $url_addr);
+        $req->content_type('application/x-www-form-urlencoded');
+        $req->content('query=libwww-perl&mode=dist');
+       
+        # Pass request to the user agent and get a response back
+        $res = $ua->request($req);
+
+        last  unless( $res->content =~ /ERR_TYPE_MYSQL/ || $res->content =~ m!<html! );
+
+        last  unless( length( $res->content ) < $MIN_CONTENT );
+
+        # XXX: wait for more, due to the sniffing
+        sleep( 60 );
+    };
    
     return $res->content;
 }
