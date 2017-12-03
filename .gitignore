@@ -22,10 +22,12 @@ mailtmp
 *.csv
 *.xml
 *.xlsx
+*.tar.xz
 
 Build/*.txt
 extra/*.txt
 
+utilities/*.list
 
 database/
 view/
