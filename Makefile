@@ -9,6 +9,7 @@ SOURCES=analyser/analyser.c analyser/data.c analyser/modules.c \
         analyser/rule.c analyser/variables.c \
         misc/message.c alhena.c
 MODULES=modules/dummy.c modules/fi.c modules/fi_low.c\
+        modules/low.c \
         modules/peak.c modules/peak_low.c \
         modules/maxday.c modules/minday.c modules/no_upseri.c \
         modules/now.c \
