@@ -24,6 +24,7 @@
 #include "misc/getopt.h"
 
 /* TODO: include modules here */
+#include "modules/avg.h"
 #include "modules/dummy.h"
 #include "modules/fi.h"
 #include "modules/fi_low.h"
@@ -72,6 +73,7 @@ int bank_collect()
     
     // TODO/FIXME: register modules here, fix to use dynamic link
     MODULE_REGISTER_HELPER( root,      &__g_sys_bank.sys[i_sys++] );
+    MODULE_REGISTER_HELPER( avg,       &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( dummy,     &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( fi,        &__g_sys_bank.sys[i_sys++] );
     MODULE_REGISTER_HELPER( filow,     &__g_sys_bank.sys[i_sys++] );

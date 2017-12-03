@@ -87,5 +87,8 @@
     <ClCompile Include="..\modules\low.c">
       <Filter>modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\avg.c">
+      <Filter>modules</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

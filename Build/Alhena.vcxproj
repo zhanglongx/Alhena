@@ -89,6 +89,7 @@
     <ClCompile Include="..\analyser\variables.c" />
     <ClCompile Include="..\misc\getopt.c" />
     <ClCompile Include="..\misc\message.c" />
+    <ClCompile Include="..\modules\avg.c" />
     <ClCompile Include="..\modules\dummy.c" />
     <ClCompile Include="..\modules\fi.c" />
     <ClCompile Include="..\modules\fi_low.c" />
