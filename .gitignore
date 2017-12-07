@@ -1,4 +1,5 @@
 .svn/
+.vs/
 .depend
 Build/*.opensdf
 Build/*.sdf
