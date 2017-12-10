@@ -4,14 +4,15 @@ ALHENA_DIR=~/Alhena
 ALHENA_DATABASE_DIR=$ALHENA_DIR/database
 ALHENA_EXTRA_DIR=$ALHENA_DIR/extra
 
-UPDATE_FILE=earning_update.lst
+MIN_TIME_INTERVAL=2592000 # 30 * 24 * 60 * 60
+MIN_FILE_SIZE=3072 # 3 * 1024 bytes
 
 #
 # Command line handling
 #
 usage()
 {
-	echo "Usage: $0 START"
+	echo "Usage: $0"
 
     exit 0
 }
@@ -22,16 +23,33 @@ failed_exit()
     exit 1
 }
 
-START=$1
+is_update_here()
+{
+    stock=$1
+    file=${ALHENA_DIR}/database/earning/${stock}_balance.txt
 
-test x$START != x || usage
+    if [ ! -e $file ]; then
+        return 1
+    fi
 
-test -e $ALHENA_DATABASE_DIR/$START.csv || failed_exit "$START is not in database"
+    # modified in 12 hrs
+    if [ `expr $(date +%s) - $(stat -c %Y $file)` -gt $MIN_TIME_INTERVAL ]; then
+        return 1
+    fi
+
+    if [ `expr $(stat -c %s $file)` -le $MIN_FILE_SIZE ]; then
+        return 1
+    fi
+
+    return 0
+}
 
 STOCKS=`find $ALHENA_DIR/database -name '*.csv' -exec basename {} '.csv' \; | sort -n`
 
 for s in $STOCKS; do
-    if test $s -ge $START; then
+
+    is_update_here $s
+    if test $? != 0; then
         LIST="$LIST $s"
     fi
 done
