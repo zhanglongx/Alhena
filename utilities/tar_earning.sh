@@ -2,7 +2,7 @@
 # Command line handling
 #
 
-TAR_NAME=database.tar.xz
+TAR_NAME=database_earning.tar.xz
 TEMP_NAME=${TAR_NAME%.xz}
 
 usage()
@@ -18,10 +18,10 @@ failed_exit()
     exit 1
 }
 
-test -e ./database || failed_exit "no database dir found"
+test -e ./database/earning || failed_exit "no database earning dir found"
 
 rm -f $TAR_NAME
 rm -f $TEMP_NAME
 
-find ./database -name '*.csv' -exec tar -rf $TEMP_NAME {} \;
+find ./database/earning -name '*.txt' -exec tar -rf $TEMP_NAME {} \;
 xz -z $TEMP_NAME
