@@ -1,11 +1,10 @@
 #! /bin/bash
 
-set -x
-
 ALHENA=/home/zhlx/Alhena
 ALL_CSV="all.csv"
-TMP_SAMPLES="_samples.txt"
-N_CHS=1 # N_CHS must match -f below!
+SAMPLE_FILE="./data/X/sample.csv"
+YEARS=5
+N_CHS=2 # N_CHS must match -f below!
 
 #
 # Command line handling
@@ -20,7 +19,7 @@ usage()
 
 while getopts 'y:h' OPT; do
     case $OPT in
-        u)
+        y)
             YEARS="$OPTARG";;
         h)
             usage;;
@@ -36,18 +35,16 @@ failed_exit()
 }
 
 test -d $ALHENA || failed_exit "alhena path error"
+test $YEARS -gt 0 || failed_exit "input YEARS error"
+
+test -d ./data || failed_exit "please mkdir ./data"
 
 # clean up
-if test -d './data'; then
-	rm -rf ./data
-fi
-
-mkdir -p ./data
+rm -rf ./data/X
 mkdir -p ./data/X
-mkdir -p ./data/Y
 
-# TODO: appoint -f, edit N below
-perl -I $ALHENA/extra $ALHENA/extra/earning_querier.pl -p $ALHENA/database -s 4 -f ROE --no-human > $ALL_CSV
+# TODO: appoint -f, edit N above
+perl -I $ALHENA/extra $ALHENA/extra/earning_querier.pl -p $ALHENA/database -s 4 -f _formula.txt --no-human > $ALL_CSV
 
 N_FILES=`ls -l $ALHENA/database/earning | wc -l`
 N_FILES=`expr $N_FILES / 3`
@@ -56,6 +53,28 @@ N_FILES=`expr $N_FILES / 3`
 test `cat $ALL_CSV | wc -l` -eq `expr $N_CHS \* $N_FILES` || failed_exit "entries error"
 
 # get x have exactly years
-cat $ALL_CSV | awk -F , -v var="$YEARS" '{if(NF>=var+2) {print $1, $2; for(i=NF-var+1; i<=NF; i++) print , $i}}' > ./data/X/samples.csv
+# XXX: about NF, workaround for the trailing ','
+cat $ALL_CSV | \
+	awk -F , -v var="$YEARS" '{if(NF>var+2) {printf "%06d, %s, ", $1, $2; for(i=NF-var; i<NF; i++) printf "%f, ", $i; printf "\n"}}' \
+		> $SAMPLE_FILE
 
-rm -f $ALL_CSV
+entries=`cat $SAMPLE_FILE | wc -l`
+
+# missing entries
+(( $entries % $N_CHS == 0 )) || failed_exit "samples.csv entries error"
+entries=`expr $entries / $N_CHS`
+
+for i in `seq $entries`; do
+	let s=$i*$N_CHS-1 e=$i*$N_CHS-1+$N_CHS-1
+
+	# get name
+	lines=`sed -n "$s, ${e}p" $SAMPLE_FILE`
+	name=`echo $lines | head -n 1 | cut -d , -f 1`
+
+	# content
+	sed -n "$s, ${e}p" $SAMPLE_FILE > ./data/X/${name}.csv
+done
+
+# tempz
+# rm -f $SAMPLE_FILE
+# rm -f $ALL_CSV
