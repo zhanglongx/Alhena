@@ -8,7 +8,7 @@
 # Imports
 import numpy as np
 import os
-from utils.utilities import *
+from utilities import *
 from sklearn.model_selection import train_test_split
 #import matplotlib.pyplot as plt
 #get_ipython().magic('matplotlib inline')
@@ -18,11 +18,8 @@ from sklearn.model_selection import train_test_split
 
 # In[2]:
 
-#X_train, labels_train, list_ch_train = read_data(data_path="./data/", split="train") # train
-#X_test, labels_test, list_ch_test = read_data(data_path="./data/", split="test") # test
-
-X_train, labels_train, list_ch_train = read_fake_data(6000, 128) # train
-X_test, labels_test, list_ch_test = read_fake_data(1000, 128) # test
+X_train, labels_train, list_ch_train = read_data(6000, 128) # train
+X_test, labels_test, list_ch_test = read_data(1000, 128) # test
 
 assert list_ch_train == list_ch_test, "Mistmatch in channels!"
 
