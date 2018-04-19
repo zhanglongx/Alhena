@@ -64,8 +64,14 @@ cat $ALL_CSV | \
 entries=`cat $SAMPLE_FILE | wc -l` 
 
 # missing entries
-(( $entries % $N_CHS == 0 )) || failed_exit "samples.csv entries error"
+(( $entries % $N_CHS == 0 )) || failed_exit "$SAMPLE_FILE entries error"
 entries=`expr $entries / $N_CHS`
+
+# rewrite $Y_LABELS
+cat $SAMPLE_FILE | cut -d , -f 1 | uniq | join -t , $Y_LABELS - > $Y_LABELS.tmp
+mv $Y_LABELS.tmp $Y_LABELS
+
+test $entries -eq `cat $Y_LABELS | wc -l` || failed_exit "X and Y samples does not match"
 
 for i in `seq $entries`; do
 	let s=$i*$N_CHS-1 e=$i*$N_CHS-1+$N_CHS-1
