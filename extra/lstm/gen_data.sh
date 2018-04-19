@@ -3,6 +3,7 @@
 ALHENA=/home/zhlx/Alhena
 ALL_CSV="all.csv"
 SAMPLE_FILE="./data/X/sample.csv"
+Y_LABELS="./data/Y/labels.csv"
 YEARS=5
 N_CHS=2 # N_CHS must match -f below!
 
@@ -38,6 +39,7 @@ test -d $ALHENA || failed_exit "alhena path error"
 test $YEARS -gt 0 || failed_exit "input YEARS error"
 
 test -d ./data || failed_exit "please mkdir ./data"
+test -e $Y_LABELS || failed_exit "no Y is found"
 
 # clean up
 rm -rf ./data/X
@@ -45,9 +47,10 @@ mkdir -p ./data/X
 
 # TODO: appoint -f, edit N above
 perl -I $ALHENA/extra $ALHENA/extra/earning_querier.pl -p $ALHENA/database -s 4 -f _formula.txt --no-human > $ALL_CSV
+cut -d , -f 1 $Y_LABELS | join -t , $ALL_CSV - > $ALL_CSV.tmp
+mv -f $ALL_CSV.tmp $ALL_CSV
 
-N_FILES=`ls -l $ALHENA/database/earning | wc -l`
-N_FILES=`expr $N_FILES / 3`
+N_FILES=`cat $Y_LABELS | wc -l`
 
 # test n_samples contains exactly n_channels * n_samples entries
 test `cat $ALL_CSV | wc -l` -eq `expr $N_CHS \* $N_FILES` || failed_exit "entries error"
@@ -58,7 +61,7 @@ cat $ALL_CSV | \
 	awk -F , -v var="$YEARS" '{if(NF>var+2) {printf "%06d, %s, ", $1, $2; for(i=NF-var; i<NF; i++) printf "%f, ", $i; printf "\n"}}' \
 		> $SAMPLE_FILE
 
-entries=`cat $SAMPLE_FILE | wc -l`
+entries=`cat $SAMPLE_FILE | wc -l` 
 
 # missing entries
 (( $entries % $N_CHS == 0 )) || failed_exit "samples.csv entries error"
@@ -76,5 +79,5 @@ for i in `seq $entries`; do
 done
 
 # tempz
-# rm -f $SAMPLE_FILE
-# rm -f $ALL_CSV
+rm -f $SAMPLE_FILE
+rm -f $ALL_CSV

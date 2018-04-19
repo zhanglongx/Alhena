@@ -1,4 +1,3 @@
-
 # coding: utf-8
 
 ## HAR CNN + LSTM training 
@@ -13,21 +12,27 @@ from sklearn.model_selection import train_test_split
 #import matplotlib.pyplot as plt
 #get_ipython().magic('matplotlib inline')
 
+lstm_size     = 6       # 3 times the amount of channels
+lstm_layers   = 2       # Number of layers
+batch_size    = 600     # Batch size
+seq_len       = 5       # Number of steps
+learning_rate = 0.0001  # Learning rate (default is 0.001)
+epochs        = 1000
+
+# Fixed
+n_classes  = 2
+n_channels = 2
 
 ### Prepare data
 
 # In[2]:
 
-X_train, labels_train, list_ch_train = read_data(6000, 128) # train
-X_test, labels_test, list_ch_test = read_data(1000, 128) # test
-
-assert list_ch_train == list_ch_test, "Mistmatch in channels!"
-
+X_train, labels_train = read_data(n_steps=seq_len, n_channels=n_channels) # train
 
 # In[3]:
 
 # Standardize
-X_train, X_test = standardize(X_train, X_test)
+# X_train, X_test = standardize(X_train, X_test)
 
 
 # Train/Validation Split
@@ -42,9 +47,9 @@ X_tr, X_vld, lab_tr, lab_vld = train_test_split(X_train, labels_train,
 
 # In[5]:
 
-y_tr = one_hot(lab_tr, n_class=2)
-y_vld = one_hot(lab_vld, n_class=2)
-y_test = one_hot(labels_test, n_class=2)
+y_tr   = one_hot(lab_tr, n_class=n_classes)
+y_vld  = one_hot(lab_vld, n_class=n_classes)
+# y_test = one_hot(labels_test, n_class=n_classes)
 
 
 # In[6]:
@@ -56,18 +61,6 @@ import tensorflow as tf
 #### Hyperparameters
 
 # In[7]:
-
-lstm_size = 6           # 3 times the amount of channels
-lstm_layers = 2         # Number of layers
-batch_size = 600        # Batch size
-seq_len = 128           # Number of steps
-learning_rate = 0.0001  # Learning rate (default is 0.001)
-epochs = 1000
-
-# Fixed
-n_classes = 2
-n_channels = 2
-
 
 # ### Construct the graph
 # Placeholders
@@ -202,7 +195,7 @@ with tf.Session(graph=graph) as sess:
                 # Initiate for validation set
                 val_state = sess.run(cell.zero_state(batch_size, tf.float32))
                 
-                val_acc_ = []
+                val_acc_  = []
                 val_loss_ = []
                 for x_v, y_v in get_batches(X_vld, y_vld, batch_size):
                     # Feed
@@ -259,18 +252,17 @@ with tf.Session(graph=graph) as sess:
 
 # In[16]:
 
-test_acc = []
+# test_acc = []
 
-with tf.Session(graph=graph) as sess:
-    # Restore
-    saver.restore(sess, tf.train.latest_checkpoint('checkpoints-crnn'))
-    
-    for x_t, y_t in get_batches(X_test, y_test, batch_size):
-        feed = {inputs_: x_t,
-                labels_: y_t,
-                keep_prob_: 1}
-        
-        batch_acc = sess.run(accuracy, feed_dict=feed)
-        test_acc.append(batch_acc)
-    print("Test accuracy: {:.6f}".format(np.mean(test_acc)))
-
+# with tf.Session(graph=graph) as sess:
+#     # Restore
+#     saver.restore(sess, tf.train.latest_checkpoint('checkpoints-crnn'))
+#     
+#     for x_t, y_t in get_batches(X_vld, y_vld, batch_size):
+#         feed = {inputs_: x_t,
+#                 labels_: y_t,
+#                 keep_prob_: 1}
+#         
+#         batch_acc = sess.run(accuracy, feed_dict=feed)
+#         test_acc.append(batch_acc)
+#     print("Test accuracy: {:.6f}".format(np.mean(test_acc)))
