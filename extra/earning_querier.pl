@@ -22,19 +22,18 @@ use alhena_database;
 
 my $MIN_CONTENT=3*1024;
 
-# XXX: must NOT loopback, e.g. '股本' => '总股本'
 my %tlb_trans = (
     '营业总收入'   => '营业总收入',
     '营业总成本'   => '营业总成本',
     '固定资产折旧' => '固定资产折旧',
-    '基本每股收益' => '每股收益',
-    '市盈率'       => '股价/每股收益',
+    '净利润'       => '净利润',
+    '稀释每股收益' => '每股收益',
+    '市盈率'       => '股价*总股本/净利润',
     '市值'         => '股价*总股本',
-    'PE'           => '股价/每股收益',
+    'PE'           => '股价*总股本/净利润',
     'ROE'          => '净利润/(资产总计-负债合计)',
-    '股本'         => '股本',
+    '股本'         => '总股本',
     '提供劳务收到的现金' => '提供劳务收到的现金',
-    '归属于母公司所有者的净利润' => '净利润',
 );
 
 my $opt_help=0;
@@ -300,19 +299,12 @@ sub read_in_csv
             next;
         }
 
-        if( index( $entry, '股本' ) >= 0 )
-        {
-            $entry = $entry;
-        }
-
         # null is for all
         my $b_in_formula = scalar( @$opt_formula ) ? 0 : 1;
 
         foreach my $__formula ( @$opt_formula )
         {
             my $formula = substitute_alias $__formula;
-
-            Encode::_utf8_on($formula);
 
             if( index( $formula, $entry ) >= 0 ||
                 index( $entry, '报表日期' ) >= 0 )
@@ -364,8 +356,6 @@ sub print_out
             # make local copy of formula
             my $formula = substitute_alias $__formula;
 
-            Encode::_utf8_on($formula);
-
             # FIXME: more strict check
             while( $formula =~ m#[^- %+*/\(\)\d]+#g )
             {
@@ -376,6 +366,8 @@ sub print_out
                 defined( $p_dataall->{$entry} ) or
                     die "$stock $entry doesn't exist\n";
             }
+
+            Encode::_utf8_on($formula);
 
             if( $opt_title )
             {

@@ -16,7 +16,7 @@ my $MAX_PER_PAGE = 50;
 my $opt_help=0;
 my $opt_debug=0;
 #my $opt_path="/home/zhlx/OneDrive/FI.Advanced/年报";
-my $opt_path="/mnt/d/Users/zhlx/OneDrive/文档/FI.Advanced/年报";
+my $opt_path="/Users/zhanglongxiao/Workdir/announce";
 
 GetOptions( "help"         => \$opt_help,
             "debug"        => \$opt_debug,
