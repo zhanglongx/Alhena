@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="15.0">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{1B099083-E3B0-4110-9152-5BE509708F82}</ProjectGuid>
+    <RootNamespace>alhenacodeview</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros"/>
+  <PropertyGroup/>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ItemGroup>
+    <ClCompile Include=".gitignore"/>
+    <ClCompile Include="Build/Alhena.sln"/>
+    <ClCompile Include="Build/Alhena.vcxproj"/>
+    <ClCompile Include="Build/Alhena.vcxproj.filters"/>
+    <ClCompile Include="Build/ReadMe.txt"/>
+    <ClCompile Include="Makefile"/>
+    <ClCompile Include="alhena.c"/>
+    <ClCompile Include="alhena.h"/>
+    <ClCompile Include="analyser/analyser.c"/>
+    <ClCompile Include="analyser/common.h"/>
+    <ClCompile Include="analyser/data.c"/>
+    <ClCompile Include="analyser/data.h"/>
+    <ClCompile Include="analyser/modules.c"/>
+    <ClCompile Include="analyser/modules.h"/>
+    <ClCompile Include="analyser/rule.c"/>
+    <ClCompile Include="analyser/rule.h"/>
+    <ClCompile Include="analyser/variables.c"/>
+    <ClCompile Include="analyser/variables.h"/>
+    <ClCompile Include="doc/how_to_add_modules.txt"/>
+    <ClCompile Include="extra/alhena_database.pm"/>
+    <ClCompile Include="extra/ann_downloader.pl"/>
+    <ClCompile Include="extra/announce_querier.pl"/>
+    <ClCompile Include="extra/auto-trade.pl"/>
+    <ClCompile Include="extra/data_printer.pl"/>
+    <ClCompile Include="extra/data_querier.pl"/>
+    <ClCompile Include="extra/earning_querier.pl"/>
+    <ClCompile Include="extra/holder_finder.pl"/>
+    <ClCompile Include="extra/holder_list.pl"/>
+    <ClCompile Include="extra/holder_querier.pl"/>
+    <ClCompile Include="extra/holder_sus.pl"/>
+    <ClCompile Include="extra/lstm/gen_data.sh"/>
+    <ClCompile Include="extra/lstm/lstm.py"/>
+    <ClCompile Include="extra/lstm/utilities.py"/>
+    <ClCompile Include="extra/range.pl"/>
+    <ClCompile Include="misc/getopt.c"/>
+    <ClCompile Include="misc/getopt.h"/>
+    <ClCompile Include="misc/list.h"/>
+    <ClCompile Include="misc/message.c"/>
+    <ClCompile Include="misc/message.h"/>
+    <ClCompile Include="modules/avg.c"/>
+    <ClCompile Include="modules/avg.h"/>
+    <ClCompile Include="modules/dummy.c"/>
+    <ClCompile Include="modules/dummy.h"/>
+    <ClCompile Include="modules/fi.c"/>
+    <ClCompile Include="modules/fi.h"/>
+    <ClCompile Include="modules/fi_low.c"/>
+    <ClCompile Include="modules/fi_low.h"/>
+    <ClCompile Include="modules/low.c"/>
+    <ClCompile Include="modules/low.h"/>
+    <ClCompile Include="modules/maxday.c"/>
+    <ClCompile Include="modules/maxday.h"/>
+    <ClCompile Include="modules/minday.c"/>
+    <ClCompile Include="modules/minday.h"/>
+    <ClCompile Include="modules/no_upseri.c"/>
+    <ClCompile Include="modules/no_upseri.h"/>
+    <ClCompile Include="modules/now.c"/>
+    <ClCompile Include="modules/now.h"/>
+    <ClCompile Include="modules/peak.c"/>
+    <ClCompile Include="modules/peak.h"/>
+    <ClCompile Include="modules/peak_low.c"/>
+    <ClCompile Include="modules/peak_low.h"/>
+    <ClCompile Include="modules/pl_trade.c"/>
+    <ClCompile Include="modules/pl_trade.h"/>
+    <ClCompile Include="modules/vol.c"/>
+    <ClCompile Include="modules/vol.h"/>
+    <ClCompile Include="utilities/basicget.sh"/>
+    <ClCompile Include="utilities/find_holder.sh"/>
+    <ClCompile Include="utilities/now.sh"/>
+    <ClCompile Include="utilities/pe_roe.sh"/>
+    <ClCompile Include="utilities/peak.sh"/>
+    <ClCompile Include="utilities/peak_low.sh"/>
+    <ClCompile Include="utilities/qget.sh"/>
+    <ClCompile Include="utilities/subipo.sh"/>
+    <ClCompile Include="utilities/tar_database.sh"/>
+    <ClCompile Include="utilities/tar_earning.sh"/>
+    <ClCompile Include="utilities/update_earning.sh"/>
+  </ItemGroup>
+</Project>

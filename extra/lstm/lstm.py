@@ -258,7 +258,7 @@ with tf.Session(graph=graph) as sess:
 #     # Restore
 #     saver.restore(sess, tf.train.latest_checkpoint('checkpoints-crnn'))
 #     
-#     for x_t, y_t in get_batches(X_vld, y_vld, batch_size):
+#     for x_t, y_t in get_batches(X_test, y_test, batch_size):
 #         feed = {inputs_: x_t,
 #                 labels_: y_t,
 #                 keep_prob_: 1}

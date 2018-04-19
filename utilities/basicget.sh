@@ -35,6 +35,7 @@ PE
 ROE
 净利润 
 净利润%
+股价
 EOF
 
 alhena_dir=~/Alhena
