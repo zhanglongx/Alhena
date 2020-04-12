@@ -15,8 +15,8 @@ use JSON;
 my $MAX_PER_PAGE = 50;
 my $opt_help=0;
 my $opt_debug=0;
-#my $opt_path="/home/zhlx/OneDrive/FI.Advanced/年报";
-my $opt_path="/Users/zhanglongxiao/Workdir/announce";
+my $opt_path="/home/zhlx/Dropbox/Personal/年报";
+#my $opt_path="/Users/zhanglongxiao/Workdir/announce";
 
 GetOptions( "help"         => \$opt_help,
             "debug"        => \$opt_debug,
@@ -39,10 +39,10 @@ sub get_url
 {
     my ($stock, $page) = @_;
 
-    my $url = 'http://www.cninfo.com.cn/cninfo-new/announcement/query';
+    my $url = 'http://www.cninfo.com.cn/new/hisAnnouncement/query';
     
     my $ua = LWP::UserAgent->new;
-    $ua->agent("MyApp/0.1 ");
+    $ua->agent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
     $ua->timeout(120);
    
     my $res;
@@ -125,7 +125,7 @@ sub mkdir_stock
 sub get_one
 {
     my ($stock) = @_;
-    my $down_pre = 'http://www.cninfo.com.cn/';
+    my $down_pre = 'http://static.cninfo.com.cn/';
 
     return  unless( $opt_debug || mkdir_stock $stock );
 
@@ -134,6 +134,7 @@ sub get_one
         my $content = get_url( $stock, $page );
 
         $content =~ /{.*}/;
+
         my $data = decode_json($&);
 
         print "$content\n"  if( $opt_debug );
